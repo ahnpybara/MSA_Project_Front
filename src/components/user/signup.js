@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { Button, Box, TextField, Container, FormControl, Select, MenuItem } from '@mui/material';
+import { Button, Box, TextField, Container, FormControl, Select, MenuItem, Modal, Typography } from '@mui/material';
+import ModalComponent from '../../util/modal';
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
-
 import axios from 'axios';
+
 export default class Signup extends Component {
     constructor(props) {
         super(props);
         this.emailMenus = Constant.getEmailMenus();
         this.state = {
+            open: false,
+            subOpen:false,
             email: '',
             name: '',
             nickname: '',
@@ -23,31 +25,31 @@ export default class Signup extends Component {
             confirmPasswordError: false,
         }
     }
-    submit = () => {
+    handleOpenClose = () => {
         const emailError = this.state.email === '';
         const nameError = this.state.name === '';
         const nicknameError = this.state.nickname === '';
         const passwordError = this.state.password === '';
         const confirmPasswordError = this.state.confirmPassword === '' || this.state.password !== this.state.confirmPassword;
-
         if (!emailError && !nameError && !nicknameError && !passwordError && !confirmPasswordError) {
             if (this.state.password !== this.state.confirmPassword) {
                 this.setState({ confirmPasswordError });
             }
             else {
-                if (window.confirm("회원가입 하시겠습니까?")) {
-                    this.callAddUserAPI().then((response) => {
-                        console.log('addUser', response);
-                        if (response.success > 0) {
-                            alert('회원가입이 완료되었습니다!');
-                            window.location.href = "/";
-                        }
-                    })
-                }
+                this.setState({ open: !this.state.open });
             }
         } else {
             this.setState({ emailError, nameError, nicknameError, passwordError, confirmPasswordError });
         }
+
+    }
+    handleSubmit = () => {
+        this.callAddUserAPI().then((response) => {
+            console.log('addUser', response);
+            if (response.success > 0) {
+                this.setState({ subOpen: !this.state.subOpen });
+           }
+       })
     }
     //회원가입 하는 API ***URL 수정 필요
     async callAddUserAPI() {
@@ -57,16 +59,20 @@ export default class Signup extends Component {
             nickname: this.state.nickname,
             password: this.state.password
         };
-        let manager = new WebServiceManager(Constant.serviceURL + "/users", "post");
-        manager.addFormData("data", formData); //넣을 데이터
-        console.log(formData);
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
+        try {
+            const response = await axios.post(Constant.serviceURL + '/users', formData);
+            console.log('서버 응답:', response.data);
+        } catch (error) {
+            console.error('오류 발생:', error);
+            alert(error); // 사용자에게 오류 내용을 알립니다.
+        }
     }
     render() {
         return (
             <Container maxWidth="sm">
+               {
+                    this.state.open === true && <ModalComponent subOpen={this.state.subOpen} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"회원가입 하시겠습니까?"}/>
+                }
                 <Box
                     component="form"
                     className="component-column"
@@ -134,7 +140,7 @@ export default class Signup extends Component {
                         helperText={this.state.confirmPasswordError && '비밀번호가 맞지 않습니다.'}
                     />
 
-                    <Button variant="contained" sx={{ mt: 2 }} onClick={this.submit}>회원가입</Button>
+                    <Button variant="contained" sx={{ mt: 2 }} onClick={this.handleOpenClose}>회원가입</Button>
                 </Box>
 
             </Container>

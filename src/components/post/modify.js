@@ -1,58 +1,66 @@
 import React, { Component } from 'react';
-import { Button, Box, TextField, Container } from '@mui/material';
+import { Button, Box, TextField, Container, Modal, Typography } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
+import UndoIcon from '@mui/icons-material/Undo';
+
+import ModalComponent from '../../util/modal';
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
 
 import axios from 'axios';
+
 export default class Create extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            postTitle: '',
-            postContent: '',
+            open: false, //모달창
+            postTitle: this.props.data.postTitle,
+            postContent: this.props.data.postContent,
             titleError: false,
             contentError: false,
             data: this.props.data,
         }
     }
-    submit = () => {
-        const titleError = this.state.title === '';
-        const contentError = this.state.content === '';
 
+    handleOpenClose = (e) => {
+        e.preventDefault();
+        const titleError = this.state.postTitle === '';
+        const contentError = this.state.postContent === '';
         if (!titleError && !contentError) {
-            if (window.confirm("수정 하시겠습니까?")) {
-                this.callAddPostAPI().then((response) => {
-                    console.log('modifyPost', response);
-                    if (response.success > 0) {
-                        alert('수정 완료되었습니다!');
-                        window.location.href = "/postList";
-                    }
-                })
-            }
+            this.setState({ open: !this.state.open });
         } else {
             this.setState({ titleError, contentError });
         }
+
     }
-    //수정 로직   
+    //API가기전에 체크
+    handleSubmit = () => {
+        this.callAddPostAPI().then(() => {
+            this.setState({ open: false });
+            window.location.href = "/postList";
+        })
+    }
+    //게시글 수정 API  
     async callAddPostAPI() {
         const formData = {
-            postTitle: this.state.postTitle,
-            postContent: this.state.postContent,
-            postNickname: this.props.data.postNickname,
-            postUserId: this.props.data.postUserId,
+            id: this.props.data.postId,
+            title: this.state.postTitle,
+            content: this.state.postContent,
         };
-        let manager = new WebServiceManager(Constant.serviceURL + "/posts", "post");
-        manager.addFormData("data", formData); //넣을 데이터
-
-        console.log(formData);
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
+        try {
+            const response = await axios.patch(Constant.serviceURL + `/posts/${this.props.data.postId}`, formData);
+            console.log('서버 응답:', response.data);
+        } catch (error) {
+            console.error('오류 발생:', error);
+            alert(error); // 사용자에게 오류 내용을 알립니다.
+        }
     }
     render() {
+        console.log(this.props.data.postId)
         return (
             <Container>
+                {
+                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"수정하시겠습니까?"} />
+                }
                 <Box
                     component="form"
                     className="component-column"
@@ -64,7 +72,7 @@ export default class Create extends Component {
                         label="제목"
                         defaultValue={this.state.data.postTitle}
                         size="small"
-                        onChange={(e) => this.setState({ title: e.target.value })}
+                        onChange={(e) => this.setState({ postTitle: e.target.value })}
                         error={this.state.titleError}
                         helperText={this.state.titleError && '제목을 입력해주세요.'}
                         variant="filled"
@@ -73,14 +81,15 @@ export default class Create extends Component {
                         defaultValue={this.state.data.postContent}
                         multiline
                         rows={20}
-                        onChange={(e) => this.setState({ content: e.target.value })}
+                        onChange={(e) => this.setState({ postContent: e.target.value })}
                         error={this.state.contentError}
                         helperText={this.state.contentError && '내용을 입력해주세요.'}
                     />
 
                 </Box>
                 <div className="component-footer">
-                    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.submit}>수정</Button>
+                    <Button variant="outlined" endIcon={<UndoIcon />} onClick={this.props.postModify} style={{ marginRight: '8px' }}>취소</Button>
+                    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.handleOpenClose}>수정</Button>
                 </div>
 
             </Container>)

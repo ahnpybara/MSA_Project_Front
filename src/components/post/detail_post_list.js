@@ -1,116 +1,121 @@
-import React, { Component } from 'react';
-import { Container, Button, ButtonGroup, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, Button, ButtonGroup, Box, IconButton } from '@mui/material';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import { Navigate, useLocation } from "react-router-dom";
 
+import ModalComponent from '../../util/modal';
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
 import PostComment from './detail_post_comment';
 import ModifyComponent from './modify';
-
 import MyStorage from '../../util/redux_storage';
-export default class DetailPostList extends Component {
-    constructor(props) {
-        super(props);
-        this.origin = [];
-        this.state = {
-            contents: [], //post정보
-            commentList: [], //comment 정보
-            loginUserNickname: MyStorage.getState().nickname,
-            loginUserId: 1, //MyStorage.getState().userId,
-            modifyVisible: false,
-        }
-    }
-    componentDidMount() {
-        this.callGetDetailPostAPI().then((response) => {
-            this.origin = response;
-            this.setState({ contents: this.origin, commentList: this.origin.commentList });
-        })
-    }
-    postHistory = () => {
+
+import axios from 'axios';
+
+const DetailPostList = () => {
+    const [open, setOpen] = useState(false);
+    const [contents, setContents] = useState([]);
+    const [commentList, setCommentList] = useState([]);
+    const [loginUserNickname, setLoginUserNickname] = useState(MyStorage.getState().nickname);
+    const [loginUserId, setLoginUserId] = useState(MyStorage.getState().userId);
+    const [modifyVisible, setModifyVisible] = useState(false);
+
+    const location = useLocation();
+    const postId = location.state.postId;
+
+    useEffect(() => {
+        callGetDetailPostAPI().then((response) => {
+            setContents(response);
+        });
+    }, []);
+
+    const scrollToAboutUs = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    const postHistory = () => {
         window.location.href = "/PostList";
-    }
-    //게시글 수정 함수
-    postModify = () => {
-        if (window.confirm("수정하시겠습니까?")) {
-            this.setState({ modifyVisible: true }) //수정을 누르면 수정 컴포넌트가 뜸
+    };
+
+    const postModify = () => {
+        setModifyVisible(!modifyVisible);
+    };
+
+    const handleOpenClose = (e) => {
+        e.preventDefault();
+        setOpen(!open);
+    };
+
+    const handleSubmit = async () => {
+        callDeletePostAPI().then((response) => {
+            setOpen(false);
+            window.location.href = "/PostList";
+        });
+    };
+
+    const callDeletePostAPI = async () => {
+        try {
+            const response = await axios.delete(Constant.serviceURL + `/posts/${postId}`);
+            console.log('response : ', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('오류 발생:', error);
         }
-    }
-    //게시글 삭제 함수
-    postDelete = () => {
-        if (window.confirm("게시글을 삭제하시겠습니까?")) {
-            //게시글 삭제 로직
-            this.callDeletePostAPI().then((response) => {
-                if (response.success > 0) {
-                    alert('삭제 완료되었습니다!');
-                }
-            })
-
+    };
+    const callGetDetailPostAPI = async () => {
+        try {
+            const response = await axios.get(Constant.serviceURL + `/dashBoards/${postId}`, { withCredentials: true });
+            console.log('response : ', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('오류 발생:', error);
         }
-    }
-    //게시글 삭제 API ***데이터 수정 필요
-    async callDeletePostAPI() {
-        const formData = {
-            userId: this.props.data.userId,
-            postId: this.props.data.postId
-        };
-
-        let manager = new WebServiceManager(Constant.serviceURL + "/posts/delete", "post");
-        ///manager.addFormData("login", login); //삭제할 권한이 있는지 확인
-        manager.addFormData("data", formData); //넣을 데이터
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
-    }
-
-    //디테일 포스트 API
-    async callGetDetailPostAPI() {
-        let manager = new WebServiceManager(Constant.serviceURL + `/posts/${this.state.contents.postId}`, "post");
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
-    }
-    render() {
-        return (
-            <Container>
-                {
-                    this.state.modifyVisible === true ? <ModifyComponent data={this.state.contents}/> :
-                        <>
-                            <Box
-                                component="form"
-                                className="component-column"
-                                noValidate
-                                autoComplete="off"
-                            >
-                                <div>
-                                    <h3>{this.state.contents.postTitle}</h3>
-                                    <h5>{this.state.contents.postNickname}</h5>
-                                </div>
-                                <div>
-                                    <p>{this.state.contents.postContent}</p>
-                                </div>
-
-                            </Box>
-                            {
-                                this.state.loginUserId === this.state.contents.postId ?
-                                    <div className="component-footer">
-                                        <ButtonGroup variant="outlined" aria-label="outlined button group">
-                                            <Button onClick={this.postModify}>수정</Button>
-                                            <Button onClick={this.postDelete}>삭제</Button>
-                                            <Button onClick={this.postHistory}>목록</Button>
-                                        </ButtonGroup>
-                                    </div> : <div className="component-footer">
-                                        <ButtonGroup variant="outlined" aria-label="outlined button group">
-                                            <Button onClick={this.postHistory}>목록</Button>
-                                        </ButtonGroup>
-                                    </div>
-                            }
+    };
 
 
-                            <PostComment commentList={this.state.commentList} />
-                        </>
-                }
+    return (
+        <Container>
+            {open === true && <ModalComponent handleSubmit={handleSubmit} handleOpenClose={handleOpenClose} message={"게시글 삭제 하시겠습니까?"} />}
+            {modifyVisible === true ? (
+                <ModifyComponent data={contents} postModify={postModify} />
+            ) : (
+                <>
+                    <Box
+                        component="form"
+                        className="component-column"
+                        id="aboutUsSection"
+                        noValidate
+                        autoComplete="off"
+                    >
+                        <div>
+                            <h3>{contents.postTitle}</h3>
+                            <h5>{contents.postNickname}</h5>
+                        </div>
+                        <div>
+                            <p>{contents.postContent}</p>
+                        </div>
+                    </Box>
+                    {loginUserId === contents.postUserId ? (
+                        <div className="component-footer">
+                            <ButtonGroup variant="outlined" aria-label="outlined button group">
+                                <Button onClick={postModify}>수정</Button>
+                                <Button onClick={handleOpenClose}>삭제</Button>
+                                <Button onClick={postHistory}>목록</Button>
+                            </ButtonGroup>
+                        </div>
+                    ) : (
+                        <div className="component-footer">
+                            <ButtonGroup variant="outlined" aria-label="outlined button group">
+                                <Button onClick={postHistory}>목록</Button>
+                            </ButtonGroup>
+                        </div>
+                    )}
+                    <PostComment key={commentList.id} commentList={commentList} />
+                    <div className="arrow" data-message="Scroll to Top">
+                        <ArrowDropUpIcon color="primary" fontSize="large" onClick={scrollToAboutUs} />
+                    </div>
+                </>
+            )}
+        </Container>
+    );
+};
 
-            </Container>
-        )
-    }
-
-}
+export default DetailPostList;

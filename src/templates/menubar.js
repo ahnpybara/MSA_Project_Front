@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Component } from "react";
-import { AppBar, Box, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Box, Toolbar, Typography, Button} from '@mui/material';
+import ModalComponent from '../util/modal';
 import logo from '../styles/image/logo.png';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -8,24 +9,22 @@ import Constant from '../util/constant_variables';
 import WebServiceManager from '../util/webservice_manager';
 
 import MyStorage from '../util/redux_storage';
-//아메시스트 : #9966CC 밝은 레드오렌지 : #ffb7b3
 
 export default class Menubar extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            open: false,
         }
     }
-
-    handleLogout = () => {
-        if (window.confirm("로그아웃하시겠습니까?")) {
+    handleOpenClose = () => {
+        this.setState({ open: !this.state.open });
+    }
+    handleSubmit = () => {
             this.callLogoutAPI().then(() => {
                 window.location.href = "/";
-                MyStorage.dispatch({type:"Logout"});
+                MyStorage.dispatch({ type: "Logout" });
             })
-        }
-
     };
     //로그아웃하는 API
     async callLogoutAPI() {
@@ -36,16 +35,22 @@ export default class Menubar extends Component {
     }
     render() {
         return (
-            <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static">
-                    <Toolbar>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                            <Link to="/PostList"><img src={logo} width={100} /></Link>
-                        </Typography>
-                        <Button color="inherit" onClick={this.handleLogout}>LOGOUT</Button>
-                    </Toolbar>
-                </AppBar>
-            </Box>
+            <>
+                {
+                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"}/>
+                }
+                <Box sx={{ flexGrow: 1 }}>
+                    <AppBar position="static">
+                        <Toolbar>
+                            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                                <Link to="/PostList"><img src={logo} width={100} /></Link>
+                            </Typography>
+                            <Button color="inherit" onClick={this.handleOpenClose}>LOGOUT</Button>
+                        </Toolbar>
+                    </AppBar>
+                </Box>
+            </>
+
         );
     }
 
