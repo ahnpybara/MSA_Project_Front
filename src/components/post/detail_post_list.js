@@ -25,6 +25,8 @@ const DetailPostList = () => {
     useEffect(() => {
         callGetDetailPostAPI().then((response) => {
             setContents(response);
+            setCommentList(response.commentList);
+            console.log("response.commentList",response.commentList)
         });
     }, []);
 
@@ -54,7 +56,7 @@ const DetailPostList = () => {
     const callDeletePostAPI = async () => {
         try {
             const response = await axios.delete(Constant.serviceURL + `/posts/${postId}`);
-            console.log('response : ', response.data);
+            console.log('DeletePost response : ', response.data);
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
@@ -63,7 +65,7 @@ const DetailPostList = () => {
     const callGetDetailPostAPI = async () => {
         try {
             const response = await axios.get(Constant.serviceURL + `/dashBoards/${postId}`, { withCredentials: true });
-            console.log('response : ', response.data);
+            console.log('GetDetailPost response : ', response.data);
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
@@ -108,7 +110,7 @@ const DetailPostList = () => {
                             </ButtonGroup>
                         </div>
                     )}
-                    <PostComment key={commentList.id} commentList={commentList} />
+                    <PostComment key={commentList.id} postId={postId} commentList={commentList} setCommentList={setCommentList}/>
                     <div className="arrow" data-message="Scroll to Top">
                         <ArrowDropUpIcon color="primary" fontSize="large" onClick={scrollToAboutUs} />
                     </div>

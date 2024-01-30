@@ -4,9 +4,7 @@ import CreateIcon from '@mui/icons-material/Create';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
 
 import axios from 'axios';
 import MyStorage from '../../util/redux_storage';
@@ -18,7 +16,6 @@ export default class PostComment extends Component {
             loginUserId: MyStorage.getState().userId,
             commentContext: '',
             commentError: false,
-
         }
     }
     //댓글 추가
@@ -29,17 +26,15 @@ export default class PostComment extends Component {
             const formData = {
                 content: this.state.commentContext,
                 nickname: this.state.loginUserNickname,
-                postId: this.props.commentList.postId, //왜 undefined가 나오지?
+                postId: this.props.postId,
                 userId: this.state.loginUserId,
             };
             // 서버로 댓글 추가 요청을 보내는 API 호출 코드
             this.callAddCommentAPI(formData)
                 .then((response) => {
                     console.log('addComment', response);
-                        this.setState((prevState) => ({
-                            commentList: [...prevState.commentList, formData],
-                            commentContext: '', // 댓글 입력 필드 초기화
-                        }));
+                    this.props.setCommentList((prevCommentList) => [
+                        ...prevCommentList,response]);
                 })
                 .catch((error) => {
                     console.error('addComment', error);
@@ -57,12 +52,13 @@ export default class PostComment extends Component {
         const formData = {
             content: this.state.commentContext,
             nickname: this.state.loginUserNickname,
-            postId: this.props.commentList.postId,
+            postId: this.props.postId,
             userId: this.state.loginUserId,
         };
         try {
             const response = await axios.post(Constant.serviceURL + '/comments', formData);
             console.log('서버 응답:', response.data);
+            return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
             alert(error); // 사용자에게 오류 내용을 알립니다.
@@ -70,7 +66,6 @@ export default class PostComment extends Component {
     }
 
     render() {
-        console.log(this.props.commentList);
         const commentList = this.props.commentList;
         return (
             <>
@@ -95,8 +90,13 @@ export default class PostComment extends Component {
                         placeholder='댓글 달기...'
                         error={this.state.commentError}
                         helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
+                        defaultValue={this.state.commentContext}
                         onChange={(e) => this.setState({ commentContext: e.target.value })}
-                        onKeyDown={(e) => (e.key === 'Enter' && this.commentSubmit)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                this.commentSubmit();
+                            }
+                        }}
                     />
                     <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
                         작성
@@ -104,7 +104,7 @@ export default class PostComment extends Component {
                 </Box>
                 {
                     commentList.map((commentData, i) =>
-                        <CommentItem key={commentData.id} commentData={commentData} />
+                        <CommentItem key={commentData.id} index={i} commentData={commentData} />
                     )
                 }
             </>
@@ -147,7 +147,7 @@ class CommentItem extends Component {
             content: updatedContent
         };
         try {
-            const response = await axios.patch(Constant.serviceURL + `/comments/${this.props.commentData.id}`, formData);
+            const response = await axios.patch(Constant.serviceURL + `/comments/${this.props.commentData}`, formData);
             console.log('서버 응답:', response.data);
         } catch (error) {
             console.error('오류 발생:', error);
