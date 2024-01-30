@@ -8,7 +8,7 @@ import Constant from '../../util/constant_variables';
 
 import axios from 'axios';
 
-export default class Create extends Component {
+export default class Modify extends Component {
     constructor(props) {
         super(props);
         this.state = {

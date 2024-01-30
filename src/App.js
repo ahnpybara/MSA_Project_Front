@@ -35,9 +35,6 @@ export default class App extends Component {
             </Route>
             <Route exact path="/PostList" element={<PostList />} />
             <Route exact path="/DetailPostList/:postId" element={<DetailPost />} />
-            <Route path="/Modify" element={<ConditionRoute path={'/'} originPath={"/Modify"} />}>
-              <Route exact path="/Modify" element={<Modify />} />
-            </Route>
 
             <Route path="*" element={<NonPage />} />
           </Routes>
@@ -54,8 +51,8 @@ class ConditionRoute extends Component {
     super(props);
 
     this.state = {
-      userId: parseInt(sessionStorage.getItem("userId")),
-      nickname: sessionStorage.getItem("nickname")
+      userId: MyStorage.getState().userId,//parseInt(sessionStorage.getItem("userId")),
+      nickname: MyStorage.getState().nickname,//sessionStorage.getItem("nickname")
     }
   }
 
@@ -79,8 +76,8 @@ class ConditionRoute extends Component {
 
 
   render() {
-    //console.log('라우터에서 렌더',MyStorage.getState());
-    //console.log("라우터에서 세션 값 = ",sessionStorage.getItem("userID"));
+    console.log('라우터에서 렌더', MyStorage.getState());
+    console.log("라우터에서 세션 값 = ", sessionStorage.getItem("userId"));
 
     if (this.state.userId != 0) {
       //console.log('라우터에서 로그인 성공 받았음',MyStorage.getState());
@@ -94,7 +91,7 @@ class ConditionRoute extends Component {
     //   return (<></>);
     // }
     else {
-      //console.log('라우터에서 거절되어 홈으로 이동함')
+      alert('로그인을 한 뒤 이용 가능');
       return (<Navigate to={this.props.path} />);
     }
   }
