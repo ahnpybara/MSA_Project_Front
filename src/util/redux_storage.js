@@ -1,6 +1,6 @@
 import {legacy_createStore as createStore} from "redux";
 
-const loginState={userId:0,nickname:"",postId:null};
+const loginState={userId:0,nickname:""};
 
 function reducer (state=loginState, action)  {
     //console.log('리덕스에서의 값들 = ',action.data);
