@@ -34,7 +34,7 @@ export default class PostComment extends Component {
                 .then((response) => {
                     console.log('addComment', response);
                     this.props.setCommentList((prevCommentList) => [
-                        ...prevCommentList,response]);
+                        ...prevCommentList, response]);
                 })
                 .catch((error) => {
                     console.error('addComment', error);
@@ -67,6 +67,7 @@ export default class PostComment extends Component {
 
     render() {
         const commentList = this.props.commentList;
+
         return (
             <>
                 <div>
@@ -83,6 +84,7 @@ export default class PostComment extends Component {
                     noValidate
                     autoComplete="off"
                 >
+
                     <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
                     <TextField
                         sx={{ ml: 1, flex: 1 }}
@@ -104,7 +106,11 @@ export default class PostComment extends Component {
                 </Box>
                 {
                     commentList.map((commentData, i) =>
-                        <CommentItem key={commentData.id} index={i} commentData={commentData} />
+                        <CommentItem
+                            key={commentData.id}
+                            index={i}
+                            commentData={commentData}
+                            loginUserId={this.state.loginUserId} />
                     )
                 }
             </>
@@ -127,13 +133,15 @@ class CommentItem extends Component {
         this.setState({ commentModalVisible: !this.state.commentModalVisible })
     }
     //수정한 텍스트 보내기
-    commentSubmit = () => {
+    commentSubmit = (e) => {
+        e.preventDefault();
         const updatedContent = this.state.commentContext;
         this.callMoidfyCommentAPI(updatedContent);
         this.setState({ commentModalVisible: !this.state.commentModalVisible });
     }
     //댓글 삭제
-    commentDelete = () => {
+    commentDelete = (e) => {
+        e.preventDefault();
         if (window.confirm("댓글을 삭제하시겠습니까?")) {
             this.callDeleteCommentAPI();
         }
@@ -142,13 +150,15 @@ class CommentItem extends Component {
     async callMoidfyCommentAPI(updatedContent) {
         //댓글 수정할때 보낼 데이터
         const formData = {
+            id: this.props.commentData.id,
             postId: this.state.postId,
             userId: this.state.loginUserId,
             content: updatedContent
         };
         try {
-            const response = await axios.patch(Constant.serviceURL + `/comments/${this.props.commentData}`, formData);
+            const response = await axios.patch(Constant.serviceURL + `/comments/${formData.id}`, formData);
             console.log('서버 응답:', response.data);
+            return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
             alert(error); // 사용자에게 오류 내용을 알립니다.
@@ -157,34 +167,28 @@ class CommentItem extends Component {
 
     //댓글 삭제 API 
     async callDeleteCommentAPI() {
-        //댓글 삭제할때 보낼 데이터
-        const formData = {
-            content: this.props.content,
-            postId: this.state.postId,
-            nickname: this.props.nickname,
-        };
         try {
             const response = await axios.delete(Constant.serviceURL + `/comments/${this.props.commentData.id}`);
-            console.log('response : ', response.data);
-            return response.data;
+            console.log('response : ', response);
+            return response;
         } catch (error) {
             console.error('오류 발생:', error);
         }
     }
     render() {
         const commentData = this.props.commentData;
-        console.log(this.props.commentData)
+        console.log(" this.props.commentData.id : ", this.props.commentData.id);
         return (
             <div>
                 <div className="component-row">
 
-                    <h5 style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
+                    <h5 className={this.state.loginUserId === commentData.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
                         this.state.loginUserId === commentData.userId && <>
                             <IconButton aria-label="edit" onClick={this.commentModify}>
                                 <EditIcon fontSize='small' />
                             </IconButton>
-                            <IconButton aria-label="delete" onClick={this.commentDelete}>
+                            <IconButton aria-label="delete" onClick={(e) => this.commentDelete(e)}>
                                 <DeleteIcon fontSize='small' />
                             </IconButton>
                         </>
@@ -208,7 +212,7 @@ class CommentItem extends Component {
                                 defaultValue={commentData.content}
                                 onChange={(e) => this.setState({ commentContext: e.target.value })}
                             />
-                            <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
+                            <Button variant="contained" endIcon={<CreateIcon />} onClick={(e) => this.commentSubmit(e)}>
                                 작성
                             </Button>
                         </Box>
