@@ -74,39 +74,39 @@ export default class PostComment extends Component {
                     <p><ChatBubbleOutlineIcon fontSize="small" color="primary" /> : <span>{commentList.length}</span></p>
                 </div>
                 {
-    this.state.loginUserId !== 0 &&  <Box
-    component="form"
-    className="component-row"
-    sx={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        '& .MuiTextField-root': { mr: 1 },
-    }}
-    noValidate
-    autoComplete="off"
->
+                    this.state.loginUserId !== 0 && <Box
+                        component="form"
+                        className="component-row"
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            '& .MuiTextField-root': { mr: 1 },
+                        }}
+                        noValidate
+                        autoComplete="off"
+                    >
 
-    <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
-    <TextField
-        sx={{ ml: 1, flex: 1 }}
-        size="small"
-        placeholder='댓글 달기...'
-        error={this.state.commentError}
-        helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
-        defaultValue={this.state.commentContext}
-        onChange={(e) => this.setState({ commentContext: e.target.value })}
-        onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-                this.commentSubmit();
-            }
-        }}
-    />
-    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
-        작성
-    </Button>
-</Box>
-}
-               
+                        <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
+                        <TextField
+                            sx={{ ml: 1, flex: 1 }}
+                            size="small"
+                            placeholder='댓글 달기...'
+                            error={this.state.commentError}
+                            helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
+                            defaultValue={this.state.commentContext}
+                            onChange={(e) => this.setState({ commentContext: e.target.value })}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    this.commentSubmit();
+                                }
+                            }}
+                        />
+                        <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
+                            작성
+                        </Button>
+                    </Box>
+                }
+
                 {
                     commentList.map((commentData, i) =>
                         <CommentItem
@@ -144,18 +144,18 @@ class CommentItem extends Component {
     }
     //댓글 삭제
     commentDelete = async (e) => {
-    e.preventDefault();
-    console.log(this.props.commentData.id);
-    if (window.confirm("댓글을 삭제하시겠습니까?")) {
-        try {
-            await this.callDeleteCommentAPI(); // 댓글 삭제 API 호출
-            // 삭제가 성공적으로 이루어진 후에 필요한 처리를 수행합니다.
-        } catch (error) {
-            console.error('댓글 삭제 오류:', error);
-            // 오류 처리를 수행합니다.
+        e.preventDefault();
+        console.log(this.props.commentData.id);
+        if (window.confirm("댓글을 삭제하시겠습니까?")) {
+            try {
+                await this.callDeleteCommentAPI(); // 댓글 삭제 API 호출
+                // 삭제가 성공적으로 이루어진 후에 필요한 처리를 수행합니다.
+            } catch (error) {
+                console.error('댓글 삭제 오류:', error);
+                // 오류 처리를 수행합니다.
+            }
         }
     }
-}
     //댓글 수정 API 
     async callMoidfyCommentAPI(updatedContent) {
         //댓글 수정할때 보낼 데이터

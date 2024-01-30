@@ -23,18 +23,22 @@ export default class App extends Component {
       typography: {
         fontFamily: 'jua'
       }
-    })
+    });
+    
     return (
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
-            <Route exact path="/" element={<Login />} />
-            <Route exact path="/Signup" element={<Signup />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/Signup" element={<Signup />} />
             <Route path="/Create" element={<ConditionRoute path={'/'} originPath={"/Create"} />}>
-              <Route exact path="/Create" element={<Create />} />
+              <Route path="/Create" element={<Create />} />
             </Route>
-            <Route exact path="/PostList" element={<PostList />} />
-            <Route exact path="/DetailPostList/:postId" element={<DetailPost />} />
+            <Route path="/PostList" element={<ConditionRoute path={'/'} originPath={"/PostList"} />}>
+              <Route path="/PostList" element={<PostList />} />
+            </Route>
+            <Route path="/DetailPostList/:postId" element={<DetailPost />} />
+
             <Route path="*" element={<NonPage />} />
           </Routes>
         </BrowserRouter>
@@ -50,23 +54,23 @@ class ConditionRoute extends Component {
     super(props);
 
     this.state = {
-      userId: MyStorage.getState().userId,//parseInt(sessionStorage.getItem("userId")),
-      nickname: MyStorage.getState().nickname,//sessionStorage.getItem("nickname")
+      userId: parseInt(sessionStorage.getItem("userId")),
+      nickname: sessionStorage.getItem("nickname")
     }
   }
 
   componentDidMount() {
     this.unsubscribe = MyStorage.subscribe(this.onStorageChange); //리덕스에서 업데이트되면 알려줘, 여기 app.js만 씀, App.js에서도 값 업더ㅔ이트를 알아야함
-
+    console.log("초기 상태", MyStorage.getState());
   }
 
   componentWillUnmount() {
-    //console.log('라우터 언 마운트...');
+    console.log('라우터 언 마운트...');
     this.unsubscribe();
   }
 
   onStorageChange = () => {
-    //console.log('라우터에서 리덕스에 변경된 값을 감지 = ', MyStorage.getState());
+    console.log('라우터에서 리덕스에 변경된 값을 감지 = ', MyStorage.getState());
     this.setState({
       userId: parseInt(sessionStorage.getItem("userId")),
       nickname: sessionStorage.getItem("nickname")
@@ -78,20 +82,13 @@ class ConditionRoute extends Component {
     console.log('라우터에서 렌더', MyStorage.getState());
     console.log("라우터에서 세션 값 = ", sessionStorage.getItem("userId"));
 
-    if (this.state.userId != 0) {
-      //console.log('라우터에서 로그인 성공 받았음',MyStorage.getState());
+    if (MyStorage.getState().userId !== 0) {
+      console.log('라우터에서 로그인 성공 받았음',MyStorage.getState());
       return (<Outlet />);
     }
-    //로그인을 통해서 들어옴(login페이지에서 visitLogin을 true로 해줌으로써 인식)
-    // else if (MyStorage.getState().visitLogin == true && this.props.originPath == "/UserInfo") {
-    //   MyStorage.dispatch({ type: "Exit" });
-    //   //console.log("Exit 후 리덕스 값 =",MyStorage.getState())
-    //   //console.log('라우터에 처음으로 들어롬');
-    //   return (<></>);
-    // }
     else {
-      alert('로그인을 한 뒤 이용 가능');
-      return (<Navigate to={this.props.path} />);
+      console.log('라우터에서 로그인 안됨',MyStorage.getState());
+      return (<Navigate to={'/'} />);
     }
   }
 }

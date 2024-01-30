@@ -58,8 +58,9 @@ export default class Signup extends Component {
             password: this.state.password
         };
         try {
-            const response = await axios.post(Constant.serviceURL + '/users', formData);
+            const response = await axios.post(Constant.serviceURL + '/users/register', formData);
             console.log('서버 응답:', response.data);
+            return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
             alert(error); // 사용자에게 오류 내용을 알립니다.
