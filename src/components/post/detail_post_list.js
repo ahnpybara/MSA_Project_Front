@@ -34,7 +34,7 @@ const DetailPostList = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     const postHistory = () => {
-        window.location.href = "/PostList";
+        window.location.href = "/";
     };
 
     const postModify = () => {
@@ -49,7 +49,7 @@ const DetailPostList = () => {
     const handleSubmit = async () => {
         callDeletePostAPI().then((response) => {
             setOpen(false);
-            window.location.href = "/PostList";
+            window.location.href = "/";
         });
     };
 

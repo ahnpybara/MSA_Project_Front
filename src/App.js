@@ -7,7 +7,6 @@ import PostList from './pages/list_page';
 import Login from './pages/login_page';
 import Signup from './pages/signup_page';
 import Create from './pages/create_page';
-import Modify from './pages/modify_page';
 import NonPage from './components/user/nonPage';
 
 import MyStorage from './util/redux_storage';
@@ -24,19 +23,17 @@ export default class App extends Component {
         fontFamily: 'jua'
       }
     });
-    
+
     return (
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<PostList />} />
             <Route path="/Signup" element={<Signup />} />
             <Route path="/Create" element={<ConditionRoute path={'/'} originPath={"/Create"} />}>
               <Route path="/Create" element={<Create />} />
             </Route>
-            <Route path="/PostList" element={<ConditionRoute path={'/'} originPath={"/PostList"} />}>
-              <Route path="/PostList" element={<PostList />} />
-            </Route>
+            <Route path="/Login" element={<Login />} />
             <Route path="/DetailPostList/:postId" element={<DetailPost />} />
 
             <Route path="*" element={<NonPage />} />
@@ -83,12 +80,12 @@ class ConditionRoute extends Component {
     console.log("라우터에서 세션 값 = ", sessionStorage.getItem("userId"));
 
     if (MyStorage.getState().userId !== 0) {
-      console.log('라우터에서 로그인 성공 받았음',MyStorage.getState());
+      console.log('라우터에서 로그인 성공 받았음', MyStorage.getState());
       return (<Outlet />);
     }
     else {
-      console.log('라우터에서 로그인 안됨',MyStorage.getState());
-      return (<Navigate to={'/'} />);
+      console.log('라우터에서 로그인 안됨', MyStorage.getState());
+      return (<Navigate to={'/Login'} />);
     }
   }
 }

@@ -6,7 +6,10 @@ import Signup from "../components/user/signup";
 export default class SignupPage extends Component {
     render() {
         return (
+            <Template>
                 <Signup />
+            </Template>
+
         )
     }
 
