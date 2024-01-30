@@ -7,10 +7,10 @@ function reducer (state=loginState, action)  {
     switch (action.type) {
         case "Login":
           // 로그인 액션 처리 로직
-          return { ...state, userId: action.data.userId, nickname: action.data.nickname, postId: action.data.postId };
+          return { ...state, userId: action.data.userId, nickname: action.data.nickname };
         case "Logout":
           // 로그아웃 액션 처리 로직
-          return { ...state, userId: 0, nickname: '', postId: action.data.postId };
+          return { ...state, userId: 0, nickname: ''};
        
         default:
           return state;

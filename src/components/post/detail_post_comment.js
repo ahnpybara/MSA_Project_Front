@@ -57,7 +57,7 @@ export default class PostComment extends Component {
         const formData = {
             content: this.state.commentContext,
             nickname: this.state.loginUserNickname,
-            postId: this.state.commentList.postId,
+            postId: this.props.commentList.postId,
             userId: this.state.loginUserId,
         };
         try {

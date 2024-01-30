@@ -21,12 +21,11 @@ export default class Login extends Component {
         MyStorage.dispatch({ type: "" });
     }
     submit = (e) => {
-
         const emailError = this.state.email === '';
         const passwordError = this.state.password === '';
         if (!emailError && !passwordError) {
             this.callLoginAPI().then((response) => {
-                if (response.userId != 0) { // 이거 수정 필요
+                if (response) { // 이거 수정 필요
                     // 백엔드에서 밑과 같은 데이터(userId, nickname,password)를 보내줘야함
                     MyStorage.dispatch({ type: "Login", data: { userId: response.userId, nickname: response.nickname } });
                 } else {
@@ -43,7 +42,8 @@ export default class Login extends Component {
     async callLoginAPI() {
         //로그인 로직
         const formData = {
-            email: this.state.email, password: this.state.password
+            email: this.state.email, 
+            password: this.state.password
         }
         try {
             const response = await axios.post(Constant.serviceURL + `/login`, formData, { withCredentials: true });

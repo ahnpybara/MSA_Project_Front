@@ -10,7 +10,7 @@ export default class Signup extends Component {
         this.emailMenus = Constant.getEmailMenus();
         this.state = {
             open: false,
-            subOpen:false,
+            subOpen: false,
             email: '',
             name: '',
             nickname: '',
@@ -46,10 +46,8 @@ export default class Signup extends Component {
     handleSubmit = () => {
         this.callAddUserAPI().then((response) => {
             console.log('addUser', response);
-            if (response.success > 0) {
-                this.setState({ subOpen: !this.state.subOpen });
-           }
-       })
+            this.setState({ subOpen: !this.state.subOpen });
+        })
     }
     //회원가입 하는 API ***URL 수정 필요
     async callAddUserAPI() {
@@ -70,8 +68,8 @@ export default class Signup extends Component {
     render() {
         return (
             <Container maxWidth="sm">
-               {
-                    this.state.open === true && <ModalComponent subOpen={this.state.subOpen} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"회원가입 하시겠습니까?"}/>
+                {
+                    this.state.open === true && <ModalComponent subOpen={this.state.subOpen} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"회원가입 하시겠습니까?"} />
                 }
                 <Box
                     component="form"

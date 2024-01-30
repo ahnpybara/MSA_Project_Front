@@ -50,7 +50,7 @@ export default class App extends Component {
             <Route exact path="/Create" element={<Create />} />
             <Route exact path="/PostList" element={<PostList />} />
             <Route exact path="/DetailPostList/:postId" element={<DetailPost />} />
-            <Route exact path="/Modify/:postId" element={<Modify />} />
+            <Route exact path="/Modify" element={<Modify />} />
             <Route path="*" element={<NonPage />} />
           </Routes>
         </BrowserRouter>
