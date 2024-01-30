@@ -73,37 +73,40 @@ export default class PostComment extends Component {
                 <div>
                     <p><ChatBubbleOutlineIcon fontSize="small" color="primary" /> : <span>{commentList.length}</span></p>
                 </div>
-                <Box
-                    component="form"
-                    className="component-row"
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        '& .MuiTextField-root': { mr: 1 },
-                    }}
-                    noValidate
-                    autoComplete="off"
-                >
+                {
+    this.state.loginUserId !== 0 &&  <Box
+    component="form"
+    className="component-row"
+    sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        '& .MuiTextField-root': { mr: 1 },
+    }}
+    noValidate
+    autoComplete="off"
+>
 
-                    <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
-                    <TextField
-                        sx={{ ml: 1, flex: 1 }}
-                        size="small"
-                        placeholder='댓글 달기...'
-                        error={this.state.commentError}
-                        helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
-                        defaultValue={this.state.commentContext}
-                        onChange={(e) => this.setState({ commentContext: e.target.value })}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                this.commentSubmit();
-                            }
-                        }}
-                    />
-                    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
-                        작성
-                    </Button>
-                </Box>
+    <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
+    <TextField
+        sx={{ ml: 1, flex: 1 }}
+        size="small"
+        placeholder='댓글 달기...'
+        error={this.state.commentError}
+        helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
+        defaultValue={this.state.commentContext}
+        onChange={(e) => this.setState({ commentContext: e.target.value })}
+        onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+                this.commentSubmit();
+            }
+        }}
+    />
+    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
+        작성
+    </Button>
+</Box>
+}
+               
                 {
                     commentList.map((commentData, i) =>
                         <CommentItem
