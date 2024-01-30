@@ -142,6 +142,7 @@ class CommentItem extends Component {
     //댓글 삭제
     commentDelete = async (e) => {
     e.preventDefault();
+    console.log(this.props.commentData.id);
     if (window.confirm("댓글을 삭제하시겠습니까?")) {
         try {
             await this.callDeleteCommentAPI(); // 댓글 삭제 API 호출

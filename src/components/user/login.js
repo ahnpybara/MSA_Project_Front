@@ -27,8 +27,8 @@ export default class Login extends Component {
             this.callLoginAPI().then((response) => {
                 if (response) { // 이거 수정 필요
                     // 백엔드에서 밑과 같은 데이터(userId, nickname,password)를 보내줘야함
-                    console.log("로그인 성공 Id=",response.userId,response.nickname); //확인
-                    MyStorage.dispatch({ type: "Login", data: { userId: response.userId, nickname: response.nickname } });
+                    console.log("로그인 성공 Id=",response.userId,response.nickname,response.email); //확인
+                    MyStorage.dispatch({ type: "Login", data: { userId: response.userId,email:response.email, nickname: response.nickname } });
                 } else {
                     this.setState({ emailError, passwordError });
                 }
