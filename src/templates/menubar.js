@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Component } from "react";
-import { AppBar, Box, Toolbar, Typography, Button} from '@mui/material';
+import { AppBar, Box, Toolbar, Typography, Button } from '@mui/material';
 
 import logo from '../styles/image/logo.png';
 
@@ -20,11 +20,11 @@ export default class Menubar extends Component {
         this.setState({ open: !this.state.open });
     }
     handleSubmit = () => {
-            this.callLogoutAPI().then((response) => {
-                MyStorage.dispatch({ type: "Logout" });
-                console.log("로그아웃 response : ",response);
-                window.location.href = "/"; //아 이거 바꿔야되는데 
-            })
+        this.callLogoutAPI().then((response) => {
+            MyStorage.dispatch({ type: "Logout" });
+            console.log("로그아웃 response : ", response);
+            window.location.href = "/"; //아 이거 바꿔야되는데 
+        })
     };
     //로그아웃하는 API
     async callLogoutAPI() {
@@ -38,10 +38,11 @@ export default class Menubar extends Component {
         }
     }
     render() {
+        console.log("지금 로그인/로그아웃 상태를 알려줌 : ",MyStorage.getState().type);
         return (
             <>
                 {
-                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"}/>
+                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"} />
                 }
                 <Box sx={{ flexGrow: 1 }}>
                     <AppBar position="static">
@@ -49,7 +50,12 @@ export default class Menubar extends Component {
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                                 <Link to="/PostList"><img src={logo} width={100} /></Link>
                             </Typography>
-                            <Button color="inherit" onClick={this.handleOpenClose}>LOGOUT</Button>
+                            {
+                                MyStorage.getState().type === "Login" ? <Button color="inherit" onClick={this.handleOpenClose}>LOGOUT</Button> :
+                                    <Button color="inherit" onClick={() => { window.location.href = "/" }}>LOGIN</Button>
+                            }
+
+
                         </Toolbar>
                     </AppBar>
                 </Box>
