@@ -140,12 +140,18 @@ class CommentItem extends Component {
         this.setState({ commentModalVisible: !this.state.commentModalVisible });
     }
     //댓글 삭제
-    commentDelete = (e) => {
-        e.preventDefault();
-        if (window.confirm("댓글을 삭제하시겠습니까?")) {
-            this.callDeleteCommentAPI();
+    commentDelete = async (e) => {
+    e.preventDefault();
+    if (window.confirm("댓글을 삭제하시겠습니까?")) {
+        try {
+            await this.callDeleteCommentAPI(); // 댓글 삭제 API 호출
+            // 삭제가 성공적으로 이루어진 후에 필요한 처리를 수행합니다.
+        } catch (error) {
+            console.error('댓글 삭제 오류:', error);
+            // 오류 처리를 수행합니다.
         }
     }
+}
     //댓글 수정 API 
     async callMoidfyCommentAPI(updatedContent) {
         //댓글 수정할때 보낼 데이터
@@ -156,7 +162,7 @@ class CommentItem extends Component {
             content: updatedContent
         };
         try {
-            const response = await axios.patch(Constant.serviceURL + `/comments/${formData.id}`, formData);
+            const response = await axios.patch(Constant.serviceURL + `/comments/${this.props.commentData.id}`, formData);
             console.log('서버 응답:', response.data);
             return response.data;
         } catch (error) {
@@ -181,7 +187,6 @@ class CommentItem extends Component {
         return (
             <div>
                 <div className="component-row">
-
                     <h5 className={this.state.loginUserId === commentData.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
                         this.state.loginUserId === commentData.userId && <>
