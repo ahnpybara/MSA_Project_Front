@@ -22,6 +22,7 @@ const DetailPostList = () => {
     const location = useLocation();
     const postId = location.state.postId;
 
+    console.log(contents.postUserId)
     useEffect(() => {
         callGetDetailPostAPI().then((response) => {
             setContents(response);
@@ -110,7 +111,7 @@ const DetailPostList = () => {
                             </ButtonGroup>
                         </div>
                     )}
-                    <PostComment key={commentList.id} postId={postId} commentList={commentList} setCommentList={setCommentList}/>
+                    <PostComment key={commentList.id} postId={postId} postUserId={contents.postUserId} commentList={commentList} setCommentList={setCommentList}/>
                     <div className="arrow" data-message="Scroll to Top">
                         <ArrowDropUpIcon color="primary" fontSize="large" onClick={scrollToAboutUs} />
                     </div>

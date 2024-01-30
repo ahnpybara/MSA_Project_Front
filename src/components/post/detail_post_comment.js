@@ -187,11 +187,11 @@ class CommentItem extends Component {
     }
     render() {
         const commentData = this.props.commentData;
-        console.log(" this.props.commentData.id : ", this.props.commentData.id);
+        console.log(" this.props.userId : ", this.props.postUserId);
         return (
             <div>
                 <div className="component-row">
-                    <h5 className={this.state.loginUserId === commentData.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
+                    <h5 className={commentData.userId === this.props.postUserId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
                         this.state.loginUserId === commentData.userId && <>
                             <IconButton aria-label="edit" onClick={this.commentModify}>
