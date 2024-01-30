@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
-import { Button, Box, TextField, Container } from '@mui/material';
+import { Button, Box, TextField, Container, Modal, Typography } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
+import UndoIcon from '@mui/icons-material/Undo';
+
+import ModalComponent from '../../util/modal';
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
+import MyStorage from '../../util/redux_storage';
+
 import axios from 'axios';
 export default class Create extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            open: false, //모달창
             postTitle: '',
             postContent: '',
             titleError: false,
@@ -15,39 +20,51 @@ export default class Create extends Component {
         };
 
     }
-
-    //API가기 전에 체크
-    handleSubmit = async (e) => {
+    cancel = () => {
+        window.location.href = "/postList";
+    }
+    handleOpenClose = (e) => {
         e.preventDefault();
         const titleError = this.state.postTitle === '';
         const contentError = this.state.postContent === '';
-
         if (!titleError && !contentError) {
-            if(window.confirm("포스트하시겠습니까?")){
-                this.callAddPostAPI();
-            }
+            this.setState({ open: !this.state.open });
         } else {
-           
             this.setState({ titleError, contentError });
         }
+
+    }
+    //API가기 전에 체크
+    handleSubmit = async () => {
+        this.callAddPostAPI().then(() => {
+            this.setState({ open: false });
+            window.location.href = "/postList";
+        })
     };
 
     //게시글 포스트 하는 API
     async callAddPostAPI() {
         //보낼 데이터
         const formData = {
-            postTitle: this.state.postTitle,
-            postContent: this.state.postContent,
+            title: this.state.postTitle,
+            content: this.state.postContent,
+            nickname: MyStorage.getState().nickname,
+            userId: MyStorage.getState().userId,
+        };
+        try {
+            const response = await axios.post(Constant.serviceURL + '/posts', formData);
+            console.log('서버 응답:', response.data);
+        } catch (error) {
+            console.error('오류 발생:', error);
+            alert(error); // 사용자에게 오류 내용을 알립니다.
         }
-        let manager = new WebServiceManager(Constant.serviceURL + "/post", "post");
-        manager.addFormData("data", formData);
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
     }
     render() {
         return (
             <Container>
+                {
+                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"포스트 하시겠습니까?"} />
+                }
                 <Box
                     component="form"
                     className="component-column"
@@ -56,12 +73,11 @@ export default class Create extends Component {
                     autoComplete="off"
                 >
                     <TextField
-                        label="제목"
+                        placeholder="제목"
                         size="small"
                         onChange={(e) => this.setState({ postTitle: e.target.value })}
                         error={this.state.titleError}
                         helperText={this.state.titleError && '제목을 입력해주세요.'}
-                        variant="filled"
                     />
                     <TextField
                         placeholder="내용을 입력해주세요."
@@ -74,7 +90,9 @@ export default class Create extends Component {
 
                 </Box>
                 <div className="component-footer">
-                    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.handleSubmit}>글쓰기</Button>
+
+                    <Button variant="outlined" endIcon={<UndoIcon />} onClick={this.cancel} style={{ marginRight: '8px' }}>취소</Button>
+                    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.handleOpenClose}>글쓰기</Button>
                 </div>
 
             </Container>)

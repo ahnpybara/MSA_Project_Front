@@ -1,21 +1,20 @@
 import {legacy_createStore as createStore} from "redux";
 
-const loginState={userId:0,nickname:""};
+const loginState={userId:0,nickname:"",postId:null};
 
 function reducer (state=loginState, action)  {
     //console.log('리덕스에서의 값들 = ',action.data);
-    switch(action.type) {
+    switch (action.type) {
         case "Login":
-            sessionStorage.setItem('userId',action.data.userId);
-            sessionStorage.setItem('nickname',action.data.nickname);
-            return {...state,userId:action.data.userId,nickname:action.data.nickname};
-        case "Logout" :
-            sessionStorage.setItem('userId',0);
-            sessionStorage.setItem('nickname','');
-            return {...state, userId:0,nickname:''};
+          // 로그인 액션 처리 로직
+          return { ...state, userId: action.data.userId, nickname: action.data.nickname };
+        case "Logout":
+          // 로그아웃 액션 처리 로직
+          return { ...state, userId: 0, nickname: ''};
+       
         default:
-            return {...state, state};
-    }
+          return state;
+      }
 };
 
 export default createStore(reducer);

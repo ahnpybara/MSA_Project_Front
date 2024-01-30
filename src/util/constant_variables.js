@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 export default class Constant{
-    static serviceURL="http://localhost:8080"; 
+    static serviceURL="http://localhost:8088"; 
 
     static getEmailMenus() {
         return [

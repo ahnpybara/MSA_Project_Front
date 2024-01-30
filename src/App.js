@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { createTheme, ThemeProvider } from "@mui/material";
 import './App.css';
 import { BrowserRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
 import DetailPost from './pages/detail_post_list_page';
@@ -15,7 +16,8 @@ export default class App extends Component {
     super(props);
     this.state = {
       userId: parseInt(sessionStorage.getItem("userId")),
-      nickname: sessionStorage.getItem("nickname")
+      nickname: sessionStorage.getItem("nickname"),
+
     }
   }
   componentDidMount() {
@@ -34,18 +36,26 @@ export default class App extends Component {
     });
   }
   render() {
+    const theme = createTheme({
+      typography:{
+        fontFamily:'jua'
+      }
+    })
     return (
-      <BrowserRouter>
-        <Routes>
-          <Route exact path="/" element={<Login />} />
-          <Route exact path="/Signup" element={<Signup />} />
-          <Route exact path="/Create" element={<Create />} />
-          <Route exact path="/PostList" element={<PostList />} />
-          <Route exact path="/DetailPostList/:postId" element={<DetailPost />} />
-          <Route exact path="/Modify/:postId" element={<Modify />} />
-          <Route path="*" element={<NonPage />} />
-        </Routes>
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route exact path="/" element={<Login />} />
+            <Route exact path="/Signup" element={<Signup />} />
+            <Route exact path="/Create" element={<Create />} />
+            <Route exact path="/PostList" element={<PostList />} />
+            <Route exact path="/DetailPostList/:postId" element={<DetailPost />} />
+            <Route exact path="/Modify" element={<Modify />} />
+            <Route path="*" element={<NonPage />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+
     );
   }
 }

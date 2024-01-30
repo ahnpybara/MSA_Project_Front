@@ -6,6 +6,9 @@ import WebServiceManager from '../../util/webservice_manager';
 
 import MyStorage from '../../util/redux_storage';
 import axios from 'axios';
+
+//   withCredentials: true,
+
 export default class Login extends Component {
     constructor(props) {
         super(props);
@@ -15,18 +18,17 @@ export default class Login extends Component {
             emailError: false,
             passwordError: false,
         };
-        MyStorage.dispatch({type:""});
+        MyStorage.dispatch({ type: "" });
     }
     submit = (e) => {
-
         const emailError = this.state.email === '';
         const passwordError = this.state.password === '';
         if (!emailError && !passwordError) {
-            this.callLoginAPI().then((response)=>{
-                if(response.userId !=0){
+            this.callLoginAPI().then((response) => {
+                if (response) { // 이거 수정 필요
                     // 백엔드에서 밑과 같은 데이터(userId, nickname,password)를 보내줘야함
-                    MyStorage.dispatch({type:"Login",data:{userId:response.userId,nickname:response.nickname}});
-                }else{
+                    MyStorage.dispatch({ type: "Login", data: { userId: response.userId, nickname: response.nickname } });
+                } else {
                     this.setState({ emailError, passwordError });
                 }
             })
@@ -39,11 +41,18 @@ export default class Login extends Component {
     //로그인하는 API
     async callLoginAPI() {
         //로그인 로직
-        let manager = new WebServiceManager(Constant.serviceURL + "/login", "post");
-        manager.addFormData("data", { email: this.state.email, password: this.state.password });
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
+        const formData = {
+            email: this.state.email, 
+            password: this.state.password
+        }
+        try {
+            const response = await axios.post(Constant.serviceURL + `/login`, formData, { withCredentials: true });
+            console.log(document.cookie);
+            return response.data;
+        }
+        catch (error) {
+            console.error('로그인 오류:', error);
+        }
 
     }
     render() {
