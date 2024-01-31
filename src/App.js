@@ -33,7 +33,9 @@ export default class App extends Component {
             <Route path="/Create" element={<ConditionRoute path={'/'} originPath={"/Create"} />}>
               <Route path="/Create" element={<Create />} />
             </Route>
-          
+            {/* <Route path="/postList" element={<ConditionRoute path={'/'} originPath={"/postList"} />}>
+              <Route path="/postList" element={<PostList />} />
+            </Route> */}
               <Route path="/postList" element={<PostList />} />
 
             <Route path="/DetailPostList/:postId" element={<DetailPost />} />
@@ -87,7 +89,7 @@ class ConditionRoute extends Component {
     }
     else {
       console.log('라우터에서 로그인 안됨', MyStorage.getState());
-      return (<Navigate to={'/Login'} />);
+      return (<Navigate to={'/'} />);
     }
   }
 }
