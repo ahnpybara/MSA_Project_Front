@@ -94,7 +94,7 @@ import axios from 'axios'; export default class PostList extends Component {
                     )}
                 </div>
                 <div className="create" data-message="New Post">
-                    <IconButton href="/create" color="primary" size="large">
+                    <IconButton href="/Create" color="primary" size="large">
                         <CreateIcon fontSize="large" />
                     </IconButton>
                 </div>

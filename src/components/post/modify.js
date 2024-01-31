@@ -36,7 +36,7 @@ export default class Modify extends Component {
     handleSubmit = () => {
         this.callAddPostAPI().then(() => {
             this.setState({ open: false });
-            window.location.href = "/";
+            window.location.href = "/postList";
         })
     }
     //게시글 수정 API  

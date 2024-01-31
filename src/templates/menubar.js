@@ -20,11 +20,11 @@ export default class Menubar extends Component {
         this.setState({ open: !this.state.open });
     }
     handleSubmit = () => {
-        // this.callLogoutAPI().then((response) => {
+         this.callLogoutAPI().then((response) => {
             MyStorage.dispatch({ type: "Logout" });
-            //console.log("로그아웃 response : ", response);
-            window.location.href = "/"; //아 이거 바꿔야되는데 
-        // })
+            console.log("로그아웃 response : ", response);
+            window.location.href = "/postList"; //아 이거 바꿔야되는데 
+         })
     }
     //로그아웃하는 API
     async callLogoutAPI() {
@@ -47,7 +47,7 @@ export default class Menubar extends Component {
                     <AppBar position="static">
                         <Toolbar>
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                                <Link to="/"><img src={logo} width={100} /></Link>
+                                <Link to="/postList"><img src={logo} width={100} /></Link>
                             </Typography>
                             {
                                 MyStorage.getState().userId === 0 ? <Button color="inherit" onClick={() => { window.location.href = '/Login' }}>LOGIN</Button> :
