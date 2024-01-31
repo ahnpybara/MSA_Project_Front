@@ -21,17 +21,17 @@ export default class Menubar extends Component {
     }
     handleSubmit = () => {
         // this.callLogoutAPI().then((response) => {
-        MyStorage.dispatch({ type: "Logout" });
-        // console.log("로그아웃 response : ", response);
-        window.location.href = "/"; //아 이거 바꿔야되는데 
+            MyStorage.dispatch({ type: "Logout" });
+            //console.log("로그아웃 response : ", response);
+            window.location.href = "/"; //아 이거 바꿔야되는데 
         // })
-    };
+    }
     //로그아웃하는 API
     async callLogoutAPI() {
         //로그아웃 로직 
         try {
             const response = await axios.get(Constant.serviceURL + `/logout`, { withCredentials: true });
-            return response.data;
+            return response;
         }
         catch (error) {
             console.error('로그아웃 오류:', error);
@@ -41,9 +41,8 @@ export default class Menubar extends Component {
         console.log("지금 로그인/로그아웃 상태를 알려줌 : ", MyStorage.getState());
         return (
             <>
-                {
-                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"} />
-                }
+                <ModalComponent open={this.state.open} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"} />
+
                 <Box sx={{ flexGrow: 1 }}>
                     <AppBar position="static">
                         <Toolbar>

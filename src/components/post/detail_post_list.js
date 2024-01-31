@@ -21,8 +21,7 @@ const DetailPostList = () => {
 
     const location = useLocation();
     const postId = location.state.postId;
-
-    console.log(contents.postUserId)
+    const userId = contents.postUserId;
     useEffect(() => {
         callGetDetailPostAPI().then((response) => {
             setContents(response);
@@ -76,7 +75,7 @@ const DetailPostList = () => {
 
     return (
         <Container>
-            {open === true && <ModalComponent handleSubmit={handleSubmit} handleOpenClose={handleOpenClose} message={"게시글 삭제 하시겠습니까?"} />}
+            <ModalComponent open={open} handleSubmit={handleSubmit} handleOpenClose={handleOpenClose} message={"게시글 삭제 하시겠습니까?"} />
             {modifyVisible === true ? (
                 <ModifyComponent data={contents} postModify={postModify} />
             ) : (
@@ -111,7 +110,7 @@ const DetailPostList = () => {
                             </ButtonGroup>
                         </div>
                     )}
-                    <PostComment key={commentList.id} postId={postId} postUserId={contents.postUserId} commentList={commentList} setCommentList={setCommentList}/>
+                    <PostComment key={commentList.id} postId={postId} userId={userId} commentList={commentList} setCommentList={setCommentList}/>
                     <div className="arrow" data-message="Scroll to Top">
                         <ArrowDropUpIcon color="primary" fontSize="large" onClick={scrollToAboutUs} />
                     </div>

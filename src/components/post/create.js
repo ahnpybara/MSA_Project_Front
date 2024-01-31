@@ -56,15 +56,13 @@ export default class Create extends Component {
             console.log('서버 응답:', response.data);
         } catch (error) {
             console.error('오류 발생:', error);
-            alert(error); // 사용자에게 오류 내용을 알립니다.
         }
     }
     render() {
         return (
             <Container>
-                {
-                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"포스트 하시겠습니까?"} />
-                }
+                 <ModalComponent open={this.state.open} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"포스트 하시겠습니까?"} />
+                
                 <Box
                     component="form"
                     className="component-column"

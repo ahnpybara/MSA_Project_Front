@@ -23,6 +23,7 @@ export default class Signup extends Component {
             nicknameError: false,
             passwordError: false,
             confirmPasswordError: false,
+            DuplicateCheck: false,
         }
     }
     handleOpenClose = () => {
@@ -46,7 +47,9 @@ export default class Signup extends Component {
     handleSubmit = () => {
         this.callAddUserAPI().then((response) => {
             console.log('addUser', response);
-            this.setState({ subOpen: !this.state.subOpen });
+            if (response) {
+                this.setState({ subOpen: !this.state.subOpen });
+            } else { console.log("회원가입 실패"); }
         })
     }
     //회원가입 하는 API ***URL 수정 필요
@@ -63,15 +66,14 @@ export default class Signup extends Component {
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
-            alert(error); // 사용자에게 오류 내용을 알립니다.
+            this.setState({ DuplicateCheck: true, open: false });
         }
     }
     render() {
         return (
             <Container maxWidth="sm">
-                {
-                    this.state.open === true && <ModalComponent subOpen={this.state.subOpen} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"회원가입 하시겠습니까?"} />
-                }
+                <ModalComponent open={this.state.open} subOpen={this.state.subOpen} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"회원가입 하시겠습니까?"} />
+
                 <Box
                     component="form"
                     className="component-column"
@@ -138,7 +140,9 @@ export default class Signup extends Component {
                         error={this.state.confirmPasswordError}
                         helperText={this.state.confirmPasswordError && '비밀번호가 맞지 않습니다.'}
                     />
-
+                    {
+                        this.state.DuplicateCheck === true && <p style={{color:'red'}}>다른 사용자가 있습니다. 다른 이메일로 바꿔주세요</p>
+                    }
                     <Button variant="contained" sx={{ mt: 2 }} onClick={this.handleOpenClose}>회원가입</Button>
                 </Box>
 
