@@ -23,7 +23,7 @@ export default class Menubar extends Component {
          this.callLogoutAPI().then((response) => {
             MyStorage.dispatch({ type: "Logout" });
             console.log("로그아웃 response : ", response);
-            window.location.href = "/postList"; //아 이거 바꿔야되는데 
+            window.location.href = "/"; //아 이거 바꿔야되는데 
          })
     }
     //로그아웃하는 API
@@ -50,7 +50,7 @@ export default class Menubar extends Component {
                                 <Link to="/postList"><img src={logo} width={100} /></Link>
                             </Typography>
                             {
-                                MyStorage.getState().userId === 0 ? <Button color="inherit" onClick={() => { window.location.href = '/Login' }}>LOGIN</Button> :
+                                MyStorage.getState().userId === 0 ? <Button color="inherit" onClick={() => { window.location.href = '/' }}>LOGIN</Button> :
                                     <Button color="inherit" onClick={this.handleOpenClose}>LOGOUT</Button>
 
                             }
