@@ -7,8 +7,6 @@ import WebServiceManager from '../../util/webservice_manager';
 import MyStorage from '../../util/redux_storage';
 import axios from 'axios';
 
-//   withCredentials: true,
-
 export default class Login extends Component {
     constructor(props) {
         super(props);
@@ -17,44 +15,41 @@ export default class Login extends Component {
             password: '',
             emailError: false,
             passwordError: false,
+            loginError: false, // 로그인 실패 여부 추가
         };
-        MyStorage.dispatch({ type: "" });
     }
-    submit = (e) => {
+    submit = async (e) => {
+        e.preventDefault();
         const emailError = this.state.email === '';
         const passwordError = this.state.password === '';
         if (!emailError && !passwordError) {
-            this.callLoginAPI().then((response) => {
-                if (response) { // 이거 수정 필요
-                    // 백엔드에서 밑과 같은 데이터(userId, nickname,password)를 보내줘야함
-                    MyStorage.dispatch({ type: "Login", data: { userId: response.userId, nickname: response.nickname } });
+            try {
+                const response = await this.callLoginAPI();
+                if (response.status === 200) {
+                    console.log("로그인 성공 Id=", parseInt(response.data.userId), response.data.nickname);
+                    MyStorage.dispatch({ type: "Login", data: { userId: parseInt(response.data.userId), nickname: response.data.nickname } });
+                    window.location.href = "/";
                 } else {
-                    this.setState({ emailError, passwordError });
+                    this.setState({ loginError: true }); // 로그인 실패 시 loginError 상태를 true로 설정
                 }
-            })
+            } catch (error) {
+                console.log(error);
+                this.setState({ loginError: true }); // 로그인 실패 시 loginError 상태를 true로 설정
+            }
         } else {
-            e.preventDefault();
             this.setState({ emailError, passwordError });
         }
     }
 
-    //로그인하는 API
     async callLoginAPI() {
-        //로그인 로직
         const formData = {
-            email: this.state.email, 
+            email: this.state.email,
             password: this.state.password
         }
-        try {
-            const response = await axios.post(Constant.serviceURL + `/login`, formData, { withCredentials: true });
-            console.log(document.cookie);
-            return response.data;
-        }
-        catch (error) {
-            console.error('로그인 오류:', error);
-        }
-
+        const response = await axios.post(Constant.serviceURL + `/login`, formData, { withCredentials: true });
+        return response;
     }
+
     render() {
         return (
             <Container maxWidth="sm">
@@ -82,15 +77,15 @@ export default class Login extends Component {
                         helperText={this.state.passwordError && '비밀번호를 제대로 입력해주세요.'}
                         onChange={(e) => this.setState({ password: e.target.value })}
                     />
-                    <Button href="/postList" variant="contained" sx={{ mt: 2 }} onClick={(e) => this.submit(e)}>로그인</Button>
+                    {this.state.loginError && <p style={{ color: 'red' }}>로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.</p>}
+                    <Button href="/" variant="contained" sx={{ mt: 2 }} onClick={(e) => this.submit(e)}>로그인</Button>
                 </Box>
 
                 <p>
                     <span>계정이 없으신가요? </span>
-                    <Button href="/signup" >회원가입</Button>
+                    <Button href="/signup">회원가입</Button>
                 </p>
             </Container>
         );
     }
-
 }

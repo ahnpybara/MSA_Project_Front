@@ -4,10 +4,13 @@ import Template from "../templates/home";
 import Login from "../components/user/login";
 
 export default class LoginPage extends Component {
-    render(){
+    render() {
         return (
-            <Login />
+            <Template>
+                <Login />
+            </Template>
+
         )
     }
-    
+
 }

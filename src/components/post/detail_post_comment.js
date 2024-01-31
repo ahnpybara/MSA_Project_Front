@@ -4,9 +4,7 @@ import CreateIcon from '@mui/icons-material/Create';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
 
 import axios from 'axios';
 import MyStorage from '../../util/redux_storage';
@@ -18,7 +16,6 @@ export default class PostComment extends Component {
             loginUserId: MyStorage.getState().userId,
             commentContext: '',
             commentError: false,
-
         }
     }
     //댓글 추가
@@ -29,17 +26,15 @@ export default class PostComment extends Component {
             const formData = {
                 content: this.state.commentContext,
                 nickname: this.state.loginUserNickname,
-                postId: this.props.commentList.postId, //왜 undefined가 나오지?
+                postId: this.props.postId,
                 userId: this.state.loginUserId,
             };
             // 서버로 댓글 추가 요청을 보내는 API 호출 코드
             this.callAddCommentAPI(formData)
                 .then((response) => {
                     console.log('addComment', response);
-                        this.setState((prevState) => ({
-                            commentList: [...prevState.commentList, formData],
-                            commentContext: '', // 댓글 입력 필드 초기화
-                        }));
+                    this.props.setCommentList((prevCommentList) => [
+                        ...prevCommentList, response]);
                 })
                 .catch((error) => {
                     console.error('addComment', error);
@@ -57,12 +52,13 @@ export default class PostComment extends Component {
         const formData = {
             content: this.state.commentContext,
             nickname: this.state.loginUserNickname,
-            postId: this.props.commentList.postId,
+            postId: this.props.postId,
             userId: this.state.loginUserId,
         };
         try {
             const response = await axios.post(Constant.serviceURL + '/comments', formData);
             console.log('서버 응답:', response.data);
+            return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
             alert(error); // 사용자에게 오류 내용을 알립니다.
@@ -70,41 +66,54 @@ export default class PostComment extends Component {
     }
 
     render() {
-        console.log(this.props.commentList);
         const commentList = this.props.commentList;
+
         return (
             <>
                 <div>
                     <p><ChatBubbleOutlineIcon fontSize="small" color="primary" /> : <span>{commentList.length}</span></p>
                 </div>
-                <Box
-                    component="form"
-                    className="component-row"
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        '& .MuiTextField-root': { mr: 1 },
-                    }}
-                    noValidate
-                    autoComplete="off"
-                >
-                    <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
-                    <TextField
-                        sx={{ ml: 1, flex: 1 }}
-                        size="small"
-                        placeholder='댓글 달기...'
-                        error={this.state.commentError}
-                        helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
-                        onChange={(e) => this.setState({ commentContext: e.target.value })}
-                        onKeyDown={(e) => (e.key === 'Enter' && this.commentSubmit)}
-                    />
-                    <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
-                        작성
-                    </Button>
-                </Box>
+                {
+                    this.state.loginUserId !== 0 && <Box
+                        component="form"
+                        className="component-row"
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            '& .MuiTextField-root': { mr: 1 },
+                        }}
+                        noValidate
+                        autoComplete="off"
+                    >
+
+                        <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
+                        <TextField
+                            sx={{ ml: 1, flex: 1 }}
+                            size="small"
+                            placeholder='댓글 달기...'
+                            error={this.state.commentError}
+                            helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
+                            defaultValue={this.state.commentContext}
+                            onChange={(e) => this.setState({ commentContext: e.target.value })}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    this.commentSubmit();
+                                }
+                            }}
+                        />
+                        <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
+                            작성
+                        </Button>
+                    </Box>
+                }
+
                 {
                     commentList.map((commentData, i) =>
-                        <CommentItem key={commentData.id} commentData={commentData} />
+                        <CommentItem
+                            key={commentData.id}
+                            index={i}
+                            commentData={commentData}
+                            loginUserId={this.state.loginUserId} />
                     )
                 }
             </>
@@ -127,21 +136,31 @@ class CommentItem extends Component {
         this.setState({ commentModalVisible: !this.state.commentModalVisible })
     }
     //수정한 텍스트 보내기
-    commentSubmit = () => {
+    commentSubmit = (e) => {
+        e.preventDefault();
         const updatedContent = this.state.commentContext;
         this.callMoidfyCommentAPI(updatedContent);
         this.setState({ commentModalVisible: !this.state.commentModalVisible });
     }
     //댓글 삭제
-    commentDelete = () => {
+    commentDelete = async (e) => {
+        e.preventDefault();
+        console.log(this.props.commentData.id);
         if (window.confirm("댓글을 삭제하시겠습니까?")) {
-            this.callDeleteCommentAPI();
+            try {
+                await this.callDeleteCommentAPI(); // 댓글 삭제 API 호출
+                // 삭제가 성공적으로 이루어진 후에 필요한 처리를 수행합니다.
+            } catch (error) {
+                console.error('댓글 삭제 오류:', error);
+                // 오류 처리를 수행합니다.
+            }
         }
     }
     //댓글 수정 API 
     async callMoidfyCommentAPI(updatedContent) {
         //댓글 수정할때 보낼 데이터
         const formData = {
+            id: this.props.commentData.id,
             postId: this.state.postId,
             userId: this.state.loginUserId,
             content: updatedContent
@@ -149,6 +168,7 @@ class CommentItem extends Component {
         try {
             const response = await axios.patch(Constant.serviceURL + `/comments/${this.props.commentData.id}`, formData);
             console.log('서버 응답:', response.data);
+            return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
             alert(error); // 사용자에게 오류 내용을 알립니다.
@@ -157,34 +177,27 @@ class CommentItem extends Component {
 
     //댓글 삭제 API 
     async callDeleteCommentAPI() {
-        //댓글 삭제할때 보낼 데이터
-        const formData = {
-            content: this.props.content,
-            postId: this.state.postId,
-            nickname: this.props.nickname,
-        };
         try {
             const response = await axios.delete(Constant.serviceURL + `/comments/${this.props.commentData.id}`);
-            console.log('response : ', response.data);
-            return response.data;
+            console.log('response : ', response);
+            return response;
         } catch (error) {
             console.error('오류 발생:', error);
         }
     }
     render() {
         const commentData = this.props.commentData;
-        console.log(this.props.commentData)
+        console.log(" this.props.userId : ", this.props.postUserId);
         return (
             <div>
                 <div className="component-row">
-
-                    <h5 style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
+                    <h5 className={commentData.userId === this.props.postUserId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
                         this.state.loginUserId === commentData.userId && <>
                             <IconButton aria-label="edit" onClick={this.commentModify}>
                                 <EditIcon fontSize='small' />
                             </IconButton>
-                            <IconButton aria-label="delete" onClick={this.commentDelete}>
+                            <IconButton aria-label="delete" onClick={(e) => this.commentDelete(e)}>
                                 <DeleteIcon fontSize='small' />
                             </IconButton>
                         </>
@@ -208,7 +221,7 @@ class CommentItem extends Component {
                                 defaultValue={commentData.content}
                                 onChange={(e) => this.setState({ commentContext: e.target.value })}
                             />
-                            <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
+                            <Button variant="contained" endIcon={<CreateIcon />} onClick={(e) => this.commentSubmit(e)}>
                                 작성
                             </Button>
                         </Box>

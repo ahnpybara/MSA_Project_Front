@@ -1,15 +1,14 @@
 import React, { useState, useEffect, Component } from "react";
-import { AppBar, Box, Toolbar, Typography, Button} from '@mui/material';
-import ModalComponent from '../util/modal';
+import { AppBar, Box, Toolbar, Typography, Button } from '@mui/material';
+
 import logo from '../styles/image/logo.png';
+
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 import Constant from '../util/constant_variables';
-import WebServiceManager from '../util/webservice_manager';
-
 import MyStorage from '../util/redux_storage';
-
+import ModalComponent from '../util/modal';
 export default class Menubar extends Component {
     constructor(props) {
         super(props);
@@ -21,31 +20,42 @@ export default class Menubar extends Component {
         this.setState({ open: !this.state.open });
     }
     handleSubmit = () => {
-            this.callLogoutAPI().then(() => {
-                window.location.href = "/";
-                MyStorage.dispatch({ type: "Logout" });
-            })
+        // this.callLogoutAPI().then((response) => {
+        MyStorage.dispatch({ type: "Logout" });
+        // console.log("로그아웃 response : ", response);
+        window.location.href = "/"; //아 이거 바꿔야되는데 
+        // })
     };
     //로그아웃하는 API
     async callLogoutAPI() {
-        let manager = new WebServiceManager(Constant.serviceURL + "/logout", "post");
-        let response = await manager.start();
-        if (response.ok)
-            return response.json();
+        //로그아웃 로직 
+        try {
+            const response = await axios.get(Constant.serviceURL + `/logout`, { withCredentials: true });
+            return response.data;
+        }
+        catch (error) {
+            console.error('로그아웃 오류:', error);
+        }
     }
     render() {
+        console.log("지금 로그인/로그아웃 상태를 알려줌 : ", MyStorage.getState());
         return (
             <>
                 {
-                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"}/>
+                    this.state.open === true && <ModalComponent handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"로그아웃하시겠습니까?"} />
                 }
                 <Box sx={{ flexGrow: 1 }}>
                     <AppBar position="static">
                         <Toolbar>
                             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                                <Link to="/PostList"><img src={logo} width={100} /></Link>
+                                <Link to="/"><img src={logo} width={100} /></Link>
                             </Typography>
-                            <Button color="inherit" onClick={this.handleOpenClose}>LOGOUT</Button>
+                            {
+                                MyStorage.getState().userId === 0 ? <Button color="inherit" onClick={() => { window.location.href = '/Login' }}>LOGIN</Button> :
+                                    <Button color="inherit" onClick={this.handleOpenClose}>LOGOUT</Button>
+
+                            }
+
                         </Toolbar>
                     </AppBar>
                 </Box>

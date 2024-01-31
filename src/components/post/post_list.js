@@ -50,9 +50,10 @@ import axios from 'axios'; export default class PostList extends Component {
         }
     }
     render() {
+        console.log("데이터 길이: ", this.state.contents.length)
         return (
             <Container>
-                <div style={{ height: '700px' }}>
+                <div style={{ height: '650px' }}>
                     <TableContainer>
                         <Table>
                             <TableHead>
@@ -64,11 +65,16 @@ import axios from 'axios'; export default class PostList extends Component {
                             </TableHead>
                             <TableBody>
                                 {
-                                    this.state.contents.slice(this.state.offset, this.state.offset + this.itemCountPerPage).map((data, i) =>
-
-                                        <PostSubList data={data} key={data.postId} index={i} />
-                                    )
+                                    this.state.contents.length === 0 ? (<TableRow hover>
+                                        <TableCell align="center" colSpan={3}>텅~ 비었습니다</TableCell>
+                                    </TableRow >) : <>
+                                        {
+                                            this.state.contents.slice(this.state.offset, this.state.offset + this.itemCountPerPage).map((data, i) =>
+                                                <PostSubList data={data} key={data.postId} index={i} />
+                                            )
+                                        }</>
                                 }
+
                             </TableBody>
 
                         </Table>
@@ -106,17 +112,11 @@ class PostSubList extends Component {
 
     render() {
         const data = this.props.data;
-        console.log("데이터 길이: ", data.length)
         return (
             <TableRow hover>
-                {
-                    data.length === 0 ? <TableCell align="center" colSpan={3}>비었습니다</TableCell> : <>
-                        <TableCell align="center" >{this.props.index + 1}</TableCell>
-                        <TableCell align="center"><Link className="cell-link" to={`/DetailPostList/${data.postId}`} state={{ postId: data.postId }}>{data.postTitle} </Link><ChatBubbleOutlineIcon fontSize="small" color="primary" /><span>{data.commentList.length}</span></TableCell>
-                        <TableCell align="center">{data.postNickname}</TableCell>
-                    </>
-                }
-
+                <TableCell align="center" >{this.props.index + 1}</TableCell>
+                <TableCell align="center"><Link className="cell-link" to={`/DetailPostList/${data.postId}`} state={{ postId: data.postId }}>{data.postTitle} </Link><ChatBubbleOutlineIcon fontSize="small" color="primary" /><span>{data.commentList.length}</span></TableCell>
+                <TableCell align="center">{data.postNickname}</TableCell>
             </TableRow >
         )
     }

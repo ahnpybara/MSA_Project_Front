@@ -22,9 +22,12 @@ const DetailPostList = () => {
     const location = useLocation();
     const postId = location.state.postId;
 
+    console.log(contents.postUserId)
     useEffect(() => {
         callGetDetailPostAPI().then((response) => {
             setContents(response);
+            setCommentList(response.commentList);
+            console.log("response.commentList",response.commentList)
         });
     }, []);
 
@@ -32,7 +35,7 @@ const DetailPostList = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
     const postHistory = () => {
-        window.location.href = "/PostList";
+        window.location.href = "/";
     };
 
     const postModify = () => {
@@ -47,14 +50,14 @@ const DetailPostList = () => {
     const handleSubmit = async () => {
         callDeletePostAPI().then((response) => {
             setOpen(false);
-            window.location.href = "/PostList";
+            window.location.href = "/";
         });
     };
 
     const callDeletePostAPI = async () => {
         try {
             const response = await axios.delete(Constant.serviceURL + `/posts/${postId}`);
-            console.log('response : ', response.data);
+            console.log('DeletePost response : ', response.data);
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
@@ -63,7 +66,7 @@ const DetailPostList = () => {
     const callGetDetailPostAPI = async () => {
         try {
             const response = await axios.get(Constant.serviceURL + `/dashBoards/${postId}`, { withCredentials: true });
-            console.log('response : ', response.data);
+            console.log('GetDetailPost response : ', response.data);
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
@@ -108,7 +111,7 @@ const DetailPostList = () => {
                             </ButtonGroup>
                         </div>
                     )}
-                    <PostComment key={commentList.id} commentList={commentList} />
+                    <PostComment key={commentList.id} postId={postId} postUserId={contents.postUserId} commentList={commentList} setCommentList={setCommentList}/>
                     <div className="arrow" data-message="Scroll to Top">
                         <ArrowDropUpIcon color="primary" fontSize="large" onClick={scrollToAboutUs} />
                     </div>
