@@ -47,7 +47,7 @@ export default class Modify extends Component {
             content: this.state.postContent,
         };
         try {
-            const response = await axios.patch(Constant.serviceURL + `/posts/${this.props.data.postId}`, formData);
+            const response = await axios.patch(Constant.serviceURL + `/posts/${this.props.data.postId}`, formData, { withCredentials: true });
             console.log('서버 응답:', response.data);
         } catch (error) {
             console.error('오류 발생:', error);
@@ -55,7 +55,6 @@ export default class Modify extends Component {
         }
     }
     render() {
-        console.log(this.props.data.postId)
         return (
             <Container>
                 <ModalComponent open={this.state.open} handleSubmit={this.handleSubmit} handleOpenClose={this.handleOpenClose} message={"수정하시겠습니까?"} />

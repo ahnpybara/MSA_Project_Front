@@ -52,7 +52,7 @@ export default class Create extends Component {
             userId: MyStorage.getState().userId,
         };
         try {
-            const response = await axios.post(Constant.serviceURL + '/posts', formData);
+            const response = await axios.post(Constant.serviceURL + '/posts', formData, { withCredentials: true });
             console.log('서버 응답:', response.data);
         } catch (error) {
             console.error('오류 발생:', error);

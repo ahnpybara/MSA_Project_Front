@@ -61,7 +61,7 @@ export default class Signup extends Component {
             password: this.state.password
         };
         try {
-            const response = await axios.post(Constant.serviceURL + '/users/register', formData);
+            const response = await axios.post(Constant.serviceURL + '/users/register', formData, { withCredentials: true });
             console.log('서버 응답:', response.data);
             return response.data;
         } catch (error) {

@@ -16,6 +16,7 @@ export default class PostComment extends Component {
             loginUserId: MyStorage.getState().userId,
             commentContext: '',
             commentError: false,
+            commentList: this.props.commentList
         }
     }
     //댓글 추가
@@ -33,19 +34,18 @@ export default class PostComment extends Component {
             // 서버로 댓글 추가 요청을 보내는 API 호출 코드
             this.callAddCommentAPI(formData)
                 .then((response) => {
-                    console.log('addComment', response);
-                    this.props.setCommentList((prevCommentList) => [
-                        ...prevCommentList, response]);
+                    console.log('addComment = ', response);
+                    // this.props.setCommentList((prevCommentList) => [
+                    //     ...prevCommentList, response]);
+                    window.location.reload(); // 새로고침
                 })
                 .catch((error) => {
-                    console.error('addComment', error);
+                    console.error('addComponentAPI error = ', error);
                     this.setState({ commentError });
                 });
         } else {
             this.setState({ commentError });
         }
-        // 댓글 추가 후 commentContext를 빈 문자열로 설정
-        this.setState({ commentContext: '' });
     }
 
     //댓글 추가 하는 API
@@ -58,7 +58,7 @@ export default class PostComment extends Component {
             userId: this.state.loginUserId,
         };
         try {
-            const response = await axios.post(Constant.serviceURL + '/comments', formData);
+            const response = await axios.post(Constant.serviceURL + '/comments', formData, { withCredentials: true });
             console.log('서버 응답:', response.data);
             return response.data;
         } catch (error) {
@@ -66,7 +66,26 @@ export default class PostComment extends Component {
             alert(error); // 사용자에게 오류 내용을 알립니다.
         }
     }
-
+    //댓글 삭제
+    commentDelete = (id) => {
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!this.props.id = ", id);
+        if (window.confirm("댓글을 삭제하시겠습니까?")) {
+            this.callDeleteCommentAPI(id).then((response) => {
+                console.log(response);
+                window.location.reload(); // 새로고침
+            })
+        }
+    }
+    //댓글 삭제 API 
+    async callDeleteCommentAPI(id) {
+        try {
+            const response = await axios.delete(Constant.serviceURL + `/comments/${id}`, { withCredentials: true });
+            console.log('response : ', response);
+            return response;
+        } catch (error) {
+            console.error('오류 발생:', error);
+        }
+    }
     render() {
         const commentList = this.props.commentList;
 
@@ -88,7 +107,7 @@ export default class PostComment extends Component {
                         autoComplete="off"
                     >
 
-                        <p className={this.props.userId === this.state.loginUserId && "special-color"} style={{ marginRight: '8px'}}>{this.state.loginUserNickname}</p>
+                        <p className={this.props.userId === this.state.loginUserId && "special-color"} style={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
                         <TextField
                             sx={{ ml: 1, flex: 1 }}
                             size="small"
@@ -112,6 +131,8 @@ export default class PostComment extends Component {
                         <CommentItem
                             key={commentData.id}
                             index={i}
+                            id={commentData.id}
+                            commentDelete={this.commentDelete} // 수정된 부분
                             commentData={commentData}
                             loginUserId={this.state.loginUserId}
                             userId={this.props.userId} />
@@ -127,82 +148,28 @@ class CommentItem extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            commentModalVisible: false,
             commentContext: '',
             loginUserId: MyStorage.getState().userId,
         }
     }
-    //수정모달 on/off
-    commentModify = () => {
-        this.setState({ commentModalVisible: !this.state.commentModalVisible })
-    }
-    //수정한 텍스트 보내기
-    commentSubmit = (e) => {
-        e.preventDefault();
-        const updatedContent = this.state.commentContext;
-        this.callMoidfyCommentAPI(updatedContent);
-        this.setState({ commentModalVisible: !this.state.commentModalVisible });
+    componentDidMount() {
     }
     //댓글 삭제
-    commentDelete = async (e) => {
-        e.preventDefault();
-        console.log(this.props.commentData.id);
-        if (window.confirm("댓글을 삭제하시겠습니까?")) {
-            try {
-                await this.callDeleteCommentAPI(); // 댓글 삭제 API 호출
-                // 삭제가 성공적으로 이루어진 후에 필요한 처리를 수행합니다.
-            } catch (error) {
-                console.error('댓글 삭제 오류:', error);
-                // 오류 처리를 수행합니다.
-            }
-        }
-    }
-    //댓글 수정 API 
-    async callMoidfyCommentAPI(updatedContent) {
-        //댓글 수정할때 보낼 데이터
-        const formData = {
-            id: this.props.commentData.id,
-            postId: this.state.postId,
-            userId: this.state.loginUserId,
-            content: updatedContent
-        };
-        try {
-            const response = await axios.patch(Constant.serviceURL + `/comments/${this.props.commentData.id}`, formData);
-            console.log('서버 응답:', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('오류 발생:', error);
-           //alert(error); // 사용자에게 오류 내용을 알립니다.
-        }
+    commentDelete = () => {
+        this.props.commentDelete(this.props.commentData.id); // 수정된 부분
     }
 
-    //댓글 삭제 API 
-    async callDeleteCommentAPI() {
-        try {
-            const response = await axios.delete(Constant.serviceURL + `/comments/${this.props.commentData.id}`);
-            console.log('response : ', response);
-            return response;
-        } catch (error) {
-            console.error('오류 발생:', error);
-        }
-    }
     render() {
         const commentData = this.props.commentData;
-        console.log(" this.props.userId : ", this.props.userId);
-        console.log(" commentData.userId : ", commentData.userId);
         return (
             <div>
                 <div className="component-row">
                     <h5 className={commentData.userId === this.props.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
-                        this.state.loginUserId === commentData.userId && <>
-                            <IconButton aria-label="edit" onClick={this.commentModify}>
-                                <EditIcon fontSize='small' />
-                            </IconButton>
-                            <IconButton aria-label="delete" onClick={(e) => this.commentDelete(e)}>
-                                <DeleteIcon fontSize='small' />
-                            </IconButton>
-                        </>
+                        this.state.loginUserId === commentData.userId &&
+                        <IconButton aria-label="delete" onClick={this.commentDelete}>
+                            <DeleteIcon fontSize='small' />
+                        </IconButton>
                     }
                 </div>
                 {

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Button, Box, TextField, Container } from '@mui/material';
 
 import Constant from '../../util/constant_variables';
-import WebServiceManager from '../../util/webservice_manager';
 
 import MyStorage from '../../util/redux_storage';
 import axios from 'axios';

@@ -22,11 +22,12 @@ const DetailPostList = () => {
     const location = useLocation();
     const postId = location.state.postId;
     const userId = contents.postUserId;
+    const id = commentList.id;
     useEffect(() => {
         callGetDetailPostAPI().then((response) => {
             setContents(response);
             setCommentList(response.commentList);
-            console.log("response.commentList",response.commentList)
+            console.log("response.commentList", response.commentList)
         });
     }, []);
 
@@ -55,7 +56,7 @@ const DetailPostList = () => {
 
     const callDeletePostAPI = async () => {
         try {
-            const response = await axios.delete(Constant.serviceURL + `/posts/${postId}`);
+            const response = await axios.delete(Constant.serviceURL + `/posts/${postId}`, { withCredentials: true });
             console.log('DeletePost response : ', response.data);
             return response.data;
         } catch (error) {
@@ -110,7 +111,7 @@ const DetailPostList = () => {
                             </ButtonGroup>
                         </div>
                     )}
-                    <PostComment key={commentList.id} postId={postId} userId={userId} commentList={commentList} setCommentList={setCommentList}/>
+                    <PostComment key={id} postId={postId} userId={userId} commentList={commentList} id={id} setCommentList={setCommentList} />
                     <div className="arrow" data-message="Scroll to Top">
                         <ArrowDropUpIcon color="primary" fontSize="large" onClick={scrollToAboutUs} />
                     </div>
