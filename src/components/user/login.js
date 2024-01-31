@@ -28,7 +28,7 @@ export default class Login extends Component {
                 if (response.status === 200) {
                     console.log("로그인 성공 Id=", parseInt(response.data.userId), response.data.nickname);
                     MyStorage.dispatch({ type: "Login", data: { userId: parseInt(response.data.userId), nickname: response.data.nickname } });
-                    window.location.href = "/";
+                    window.location.href = "/postList";
                 } else {
                     this.setState({ loginError: true }); // 로그인 실패 시 loginError 상태를 true로 설정
                 }
@@ -78,7 +78,7 @@ export default class Login extends Component {
                         onChange={(e) => this.setState({ password: e.target.value })}
                     />
                     {this.state.loginError && <p style={{ color: 'red' }}>로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.</p>}
-                    <Button href="/" variant="contained" sx={{ mt: 2 }} onClick={(e) => this.submit(e)}>로그인</Button>
+                    <Button href="/postList" variant="contained" sx={{ mt: 2 }} onClick={(e) => this.submit(e)}>로그인</Button>
                 </Box>
 
                 <p>

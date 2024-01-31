@@ -28,12 +28,14 @@ export default class App extends Component {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<PostList />} />
+            <Route path="/" element={<Login />} />
             <Route path="/Signup" element={<Signup />} />
             <Route path="/Create" element={<ConditionRoute path={'/'} originPath={"/Create"} />}>
               <Route path="/Create" element={<Create />} />
             </Route>
-            <Route path="/Login" element={<Login />} />
+          
+              <Route path="/postList" element={<PostList />} />
+
             <Route path="/DetailPostList/:postId" element={<DetailPost />} />
 
             <Route path="*" element={<NonPage />} />

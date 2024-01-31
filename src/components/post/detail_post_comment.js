@@ -19,7 +19,8 @@ export default class PostComment extends Component {
         }
     }
     //댓글 추가
-    commentSubmit = () => {
+    commentSubmit = (e) => {
+        e.preventDefault();
         const commentError = this.state.commentContext === '';
 
         if (!commentError) {
@@ -43,7 +44,8 @@ export default class PostComment extends Component {
         } else {
             this.setState({ commentError });
         }
-
+        // 댓글 추가 후 commentContext를 빈 문자열로 설정
+        this.setState({ commentContext: '' });
     }
 
     //댓글 추가 하는 API
@@ -86,7 +88,7 @@ export default class PostComment extends Component {
                         autoComplete="off"
                     >
 
-                        <p sx={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
+                        <p className={this.props.userId === this.state.loginUserId && "special-color"} style={{ marginRight: '8px'}}>{this.state.loginUserNickname}</p>
                         <TextField
                             sx={{ ml: 1, flex: 1 }}
                             size="small"
@@ -95,10 +97,8 @@ export default class PostComment extends Component {
                             helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
                             defaultValue={this.state.commentContext}
                             onChange={(e) => this.setState({ commentContext: e.target.value })}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    this.commentSubmit();
-                                }
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') { this.commentSubmit(e) }
                             }}
                         />
                         <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
@@ -113,7 +113,8 @@ export default class PostComment extends Component {
                             key={commentData.id}
                             index={i}
                             commentData={commentData}
-                            loginUserId={this.state.loginUserId} />
+                            loginUserId={this.state.loginUserId}
+                            userId={this.props.userId} />
                     )
                 }
             </>
@@ -171,7 +172,7 @@ class CommentItem extends Component {
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
-            alert(error); // 사용자에게 오류 내용을 알립니다.
+           //alert(error); // 사용자에게 오류 내용을 알립니다.
         }
     }
 
@@ -187,11 +188,12 @@ class CommentItem extends Component {
     }
     render() {
         const commentData = this.props.commentData;
-        console.log(" this.props.userId : ", this.props.postUserId);
+        console.log(" this.props.userId : ", this.props.userId);
+        console.log(" commentData.userId : ", commentData.userId);
         return (
             <div>
                 <div className="component-row">
-                    <h5 className={commentData.userId === this.props.postUserId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
+                    <h5 className={commentData.userId === this.props.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
                         this.state.loginUserId === commentData.userId && <>
                             <IconButton aria-label="edit" onClick={this.commentModify}>

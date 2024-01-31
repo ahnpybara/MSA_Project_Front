@@ -6,9 +6,7 @@ import Login from "../components/user/login";
 export default class LoginPage extends Component {
     render() {
         return (
-            <Template>
                 <Login />
-            </Template>
 
         )
     }

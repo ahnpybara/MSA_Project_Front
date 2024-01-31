@@ -31,7 +31,7 @@ export default class ModalComponent extends Component {
         return (
             <div>
                 <Modal
-                    open={this.props.handleOpenClose}
+                    open={this.props.open}
                     onClose={this.props.handleOpenClose}
                     aria-labelledby="modal-modal-title"
                     aria-describedby="modal-modal-description"
