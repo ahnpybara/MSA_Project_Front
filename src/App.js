@@ -33,10 +33,10 @@ export default class App extends Component {
             <Route path="/Create" element={<ConditionRoute path={'/'} originPath={"/Create"} />}>
               <Route path="/Create" element={<Create />} />
             </Route>
-            {/* <Route path="/postList" element={<ConditionRoute path={'/'} originPath={"/postList"} />}>
-              <Route path="/postList" element={<PostList />} />
+            {/* <Route path="/PostList" element={<ConditionRoute path={'/'} originPath={"/PostList"} />}>
+              <Route path="/PostList" element={<PostList />} />
             </Route> */}
-              <Route path="/postList" element={<PostList />} />
+              <Route path="/PostList" element={<PostList />} />
 
             <Route path="/DetailPostList/:postId" element={<DetailPost />} />
 

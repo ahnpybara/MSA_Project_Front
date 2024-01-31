@@ -21,7 +21,7 @@ export default class Create extends Component {
 
     }
     cancel = () => {
-        window.location.href = "/postList";
+        window.location.href = "/PostList";
     }
     handleOpenClose = (e) => {
         e.preventDefault();
@@ -38,7 +38,7 @@ export default class Create extends Component {
     handleSubmit = async () => {
         this.callAddPostAPI().then(() => {
             this.setState({ open: false });
-            window.location.href = "/postList";
+            window.location.href = "/PostList";
         })
     };
 

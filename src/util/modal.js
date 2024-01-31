@@ -50,7 +50,7 @@ export default class ModalComponent extends Component {
                                     회원가입이 성공적으로 완료되었습니다! 로그인 페이지로 가시겠습니까?
                                 </Typography>
                                 <Typography id="modal-modal-description" sx={{ mt: 2, textAlign: 'center' }}>
-                                    <Button onClick={() => { window.location.href = "/Login" }}>예</Button>
+                                    <Button onClick={() => { window.location.href = "/" }}>예</Button>
                                 </Typography>
 
                             </Box>
