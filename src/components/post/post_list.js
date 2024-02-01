@@ -43,17 +43,16 @@ import axios from 'axios'; export default class PostList extends Component {
     async callGetPostAPI() {
         try {
             const response = await axios.get(Constant.serviceURL + '/dashBoards', { withCredentials: true });
-            console.log('response : ', response.data._embedded.dashBoards) // 서버로부터 받은 응답을 콘솔에 출력합니다.
+            //console.log('response : ', response.data._embedded.dashBoards) // 서버로부터 받은 응답을 콘솔에 출력합니다.
             return response.data._embedded.dashBoards;
         } catch (error) {
             console.error('오류 발생:', error); // 요청 중 오류가 발생하면 콘솔에 오류 메시지를 출력합니다.
         }
     }
     render() {
-        console.log("데이터 길이: ", this.state.contents.length)
         return (
             <Container>
-                <div style={{ height: '650px' }}>
+                <div style={{ height: '680px' }}>
                     <TableContainer>
                         <Table>
                             <TableHead>
@@ -115,7 +114,7 @@ class PostSubList extends Component {
         return (
             <TableRow hover>
                 <TableCell align="center" >{this.props.index + 1}</TableCell>
-                <TableCell align="center"><Link className="cell-link" to={`/DetailPostList/${data.postId}`} state={{ postId: data.postId }}>{data.postTitle} </Link><ChatBubbleOutlineIcon fontSize="small" color="primary" /><span>{data.commentList.length}</span></TableCell>
+                <TableCell align="center"><Link className="cell-link" to={`/DetailPostList/${data.postId}`} state={{ postId: data.postId }}>{data.postTitle} <ChatBubbleOutlineIcon fontSize="small" color="primary" /><span>{data.commentList.length}</span></Link></TableCell>
                 <TableCell align="center">{data.postNickname}</TableCell>
             </TableRow >
         )

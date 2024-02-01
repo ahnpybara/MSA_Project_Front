@@ -49,7 +49,7 @@ export default class Signup extends Component {
             console.log('addUser', response);
             if (response) {
                 this.setState({ subOpen: !this.state.subOpen });
-            } else { console.log("회원가입 실패"); }
+            }
         })
     }
     //회원가입 하는 API ***URL 수정 필요

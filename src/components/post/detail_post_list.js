@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Button, ButtonGroup, Box, IconButton } from '@mui/material';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import { Navigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import ModalComponent from '../../util/modal';
 import Constant from '../../util/constant_variables';
@@ -23,11 +23,12 @@ const DetailPostList = () => {
     const postId = location.state.postId;
     const userId = contents.postUserId;
     const id = commentList.id;
+
     useEffect(() => {
         callGetDetailPostAPI().then((response) => {
             setContents(response);
             setCommentList(response.commentList);
-            console.log("response.commentList", response.commentList)
+           // console.log("response.commentList", response.commentList)
         });
     }, []);
 
@@ -57,7 +58,7 @@ const DetailPostList = () => {
     const callDeletePostAPI = async () => {
         try {
             const response = await axios.delete(Constant.serviceURL + `/posts/${postId}`, { withCredentials: true });
-            console.log('DeletePost response : ', response.data);
+            //console.log('DeletePost response : ', response.data);
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
@@ -66,7 +67,7 @@ const DetailPostList = () => {
     const callGetDetailPostAPI = async () => {
         try {
             const response = await axios.get(Constant.serviceURL + `/dashBoards/${postId}`, { withCredentials: true });
-            console.log('GetDetailPost response : ', response.data);
+           // console.log('GetDetailPost response : ', response.data);
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);

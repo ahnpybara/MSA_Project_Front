@@ -5,13 +5,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import Constant from '../../util/constant_variables';
-
+import ModalComponent from '../../util/modal';
 import axios from 'axios';
 import MyStorage from '../../util/redux_storage';
 export default class PostComment extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            open: false,
             loginUserNickname: MyStorage.getState().nickname,
             loginUserId: MyStorage.getState().userId,
             commentContext: '',
@@ -34,18 +35,30 @@ export default class PostComment extends Component {
             // 서버로 댓글 추가 요청을 보내는 API 호출 코드
             this.callAddCommentAPI(formData)
                 .then((response) => {
-                    console.log('addComment = ', response);
-                    // this.props.setCommentList((prevCommentList) => [
-                    //     ...prevCommentList, response]);
                     window.location.reload(); // 새로고침
                 })
                 .catch((error) => {
-                    console.error('addComponentAPI error = ', error);
                     this.setState({ commentError });
                 });
         } else {
             this.setState({ commentError });
         }
+    }
+    //댓글 수정
+    commentModify = (id) => {
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!this.props.id = ", id);
+        this.callModifyCommentAPI(id).then((response) => {
+            console.log(response);
+            window.location.reload(); // 새로고침
+        })
+    }
+    //댓글 삭제
+    commentDelete = (id) => {
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!this.props.id = ", id);
+        this.callDeleteCommentAPI(id).then((response) => {
+            console.log(response);
+            window.location.reload(); // 새로고침
+        })
     }
 
     //댓글 추가 하는 API
@@ -63,19 +76,10 @@ export default class PostComment extends Component {
             return response.data;
         } catch (error) {
             console.error('오류 발생:', error);
-            alert(error); // 사용자에게 오류 내용을 알립니다.
+            throw error;
         }
     }
-    //댓글 삭제
-    commentDelete = (id) => {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!this.props.id = ", id);
-        if (window.confirm("댓글을 삭제하시겠습니까?")) {
-            this.callDeleteCommentAPI(id).then((response) => {
-                console.log(response);
-                window.location.reload(); // 새로고침
-            })
-        }
-    }
+
     //댓글 삭제 API 
     async callDeleteCommentAPI(id) {
         try {
@@ -86,11 +90,23 @@ export default class PostComment extends Component {
             console.error('오류 발생:', error);
         }
     }
+    //댓글 수정 API 
+    async callModifyCommentAPI(id) {
+        try {
+            const response = await axios.patch(Constant.serviceURL + `/comments/${id}`, { withCredentials: true });
+            console.log('response : ', response);
+            return response;
+        } catch (error) {
+            console.error('오류 발생:', error);
+        }
+    }
+
     render() {
         const commentList = this.props.commentList;
 
         return (
             <>
+
                 <div>
                     <p><ChatBubbleOutlineIcon fontSize="small" color="primary" /> : <span>{commentList.length}</span></p>
                 </div>
@@ -133,6 +149,7 @@ export default class PostComment extends Component {
                             index={i}
                             id={commentData.id}
                             commentDelete={this.commentDelete} // 수정된 부분
+                            commentModify={this.commentModify}
                             commentData={commentData}
                             loginUserId={this.state.loginUserId}
                             userId={this.props.userId} />
@@ -150,26 +167,41 @@ class CommentItem extends Component {
         this.state = {
             commentContext: '',
             loginUserId: MyStorage.getState().userId,
+            commentModalVisible: false,
         }
     }
     componentDidMount() {
     }
+    //댓글 수정
+    commentModify = () => {
+        this.setState({ commentModalVisible: !this.state.commentModalVisible });
+    }
+    commentSubmit = (id) => {
+        this.props.commentModify(this.props.commentData.id); // 수정
+        console.log(id);
+    }
     //댓글 삭제
-    commentDelete = () => {
-        this.props.commentDelete(this.props.commentData.id); // 수정된 부분
+    commentDelete = (id) => {
+        this.props.commentDelete(this.props.commentData.id); // 삭제
+        console.log(id);
     }
 
     render() {
         const commentData = this.props.commentData;
         return (
-            <div>
+            <div key={this.props.commentData.id}>
                 <div className="component-row">
                     <h5 className={commentData.userId === this.props.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                     {
-                        this.state.loginUserId === commentData.userId &&
-                        <IconButton aria-label="delete" onClick={this.commentDelete}>
-                            <DeleteIcon fontSize='small' />
-                        </IconButton>
+                        this.state.loginUserId === commentData.userId && <>
+                            <IconButton aria-label="modify" onClick={this.commentModify}>
+                                <EditIcon fontSize='small' />
+                            </IconButton>
+                            <IconButton aria-label="delete" onClick={(e) => this.commentDelete(e.id)}>
+                                <DeleteIcon fontSize='small' />
+                            </IconButton>
+                        </>
+
                     }
                 </div>
                 {
@@ -190,7 +222,7 @@ class CommentItem extends Component {
                                 defaultValue={commentData.content}
                                 onChange={(e) => this.setState({ commentContext: e.target.value })}
                             />
-                            <Button variant="contained" endIcon={<CreateIcon />} onClick={(e) => this.commentSubmit(e)}>
+                            <Button variant="contained" endIcon={<CreateIcon />} onClick={(e) => this.commentSubmit(e.id)}>
                                 작성
                             </Button>
                         </Box>
