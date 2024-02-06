@@ -1,14 +1,11 @@
-import React,{Component} from "react";
-
+import React from "react";
 import Template from "../templates/home";
 import Create from "../components/post/create";
 
-export default class CreatePage extends Component{
-    render(){
-        return(
-            <Template>
-                <Create/>
-            </Template>
-        )
-    }
-}
+export default function CreatePage() {
+    return (
+        <Template>
+            <Create />
+        </Template>
+    );
+};

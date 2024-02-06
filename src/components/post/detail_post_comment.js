@@ -1,74 +1,87 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { Button, Box, TextField, IconButton, Typography } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CircularProgress from '@mui/material/CircularProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import Constant from '../../util/constant_variables';
 import ModalComponent from '../../util/modal';
 import axios from 'axios';
-import MyStorage from '../../util/redux_storage';
-export default class PostComment extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            open: false,
-            loginUserNickname: MyStorage.getState().nickname,
-            loginUserId: MyStorage.getState().userId,
-            commentContext: '',
-            commentError: false,
-            commentList: this.props.commentList
-        }
-    }
-    //댓글 추가
-    commentSubmit = (e) => {
-        e.preventDefault();
-        const commentError = this.state.commentContext === '';
+import { useSelector } from 'react-redux';
 
+const PostComment = ({ commentList, postId, userId }) => {
+    const commentItemRef = useRef();
+    const loginUserNickname = useSelector(state => state.nickname);
+    const loginUserId = useSelector(state => state.userId);
+
+    const [open, setOpen] = useState(false);
+    const [commentContext, setCommentContext] = useState('');
+    const [commentError, setCommentError] = useState(false);
+    const [commentData, setCommentData] = useState(commentList);
+
+    useEffect(() => {
+        setCommentData(commentList);
+    }, [commentList]);
+
+    //API가기 전 체크
+    const commentSubmit = (e) => {
+        e.preventDefault();
+        const commentError = commentContext === '';
         if (!commentError) {
-            const formData = {
-                content: this.state.commentContext,
-                nickname: this.state.loginUserNickname,
-                postId: this.props.postId,
-                userId: this.state.loginUserId,
-            };
-            // 서버로 댓글 추가 요청을 보내는 API 호출 코드
-            this.callAddCommentAPI(formData)
+            callAddCommentAPI()
                 .then((response) => {
                     window.location.reload(); // 새로고침
                 })
                 .catch((error) => {
-                    this.setState({ commentError });
+                    setCommentError(true);
                 });
         } else {
-            this.setState({ commentError });
+            setCommentError(true);
         }
     }
-    //댓글 수정
-    commentModify = (id) => {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!this.props.id = ", id);
-        this.callModifyCommentAPI(id).then((response) => {
-            console.log(response);
-            window.location.reload(); // 새로고침
-        })
-    }
     //댓글 삭제
-    commentDelete = (id) => {
-        console.log("!!!!!!!!!!!!!!!!!!!!!!!this.props.id = ", id);
-        this.callDeleteCommentAPI(id).then((response) => {
+    const commentDelete = (id) => {
+        callDeleteCommentAPI(id).then((response) => {
             console.log(response);
             window.location.reload(); // 새로고침
         })
     }
-
-    //댓글 추가 하는 API
-    async callAddCommentAPI() {
-        //댓글 추가할때 보낼 데이터
+    //댓글 수정
+    const commentModify = (id) => {
+        callModifyCommentAPI(id).then((response) => {
+            console.log(response);
+            window.location.reload(); // 새로고침
+        })
+    }
+    //댓글 삭제 API 
+    async function callDeleteCommentAPI(id) {
+        try {
+            const response = await axios.delete(Constant.serviceURL + `/comments/${id}`, { withCredentials: true });
+            console.log('response : ', response);
+            return response;
+        } catch (error) {
+            console.error('오류 발생:', error);
+        }
+    }
+    //댓글 수정 API 
+    async function callModifyCommentAPI(id) {
+        try {
+            const response = await axios.patch(Constant.serviceURL + `/comments/${id}`, { withCredentials: true });
+            console.log('response : ', response);
+            return response;
+        } catch (error) {
+            console.error('오류 발생:', error);
+        }
+    }
+    //댓글 추가 API
+    async function callAddCommentAPI() {
+        //보낼 데이터
         const formData = {
-            content: this.state.commentContext,
-            nickname: this.state.loginUserNickname,
-            postId: this.props.postId,
-            userId: this.state.loginUserId,
+            content: commentContext,
+            nickname: loginUserNickname,
+            postId: postId,
+            userId: loginUserId,
         };
         try {
             const response = await axios.post(Constant.serviceURL + '/comments', formData, { withCredentials: true });
@@ -80,157 +93,112 @@ export default class PostComment extends Component {
         }
     }
 
-    //댓글 삭제 API 
-    async callDeleteCommentAPI(id) {
-        try {
-            const response = await axios.delete(Constant.serviceURL + `/comments/${id}`, { withCredentials: true });
-            console.log('response : ', response);
-            return response;
-        } catch (error) {
-            console.error('오류 발생:', error);
-        }
+    return (
+        <>
+            <div>
+                <p><ChatBubbleOutlineIcon fontSize="small" color="primary" /> : <span>{commentData.length}</span></p>
+            </div>
+            {
+                loginUserId !== 0 && <Box
+                    component="form"
+                    className="component-row"
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        '& .MuiTextField-root': { mr: 1 },
+                    }}
+                    noValidate
+                    autoComplete="off"
+                >
+
+                    <p className={userId === loginUserId && "special-color"} style={{ marginRight: '8px' }}>{loginUserNickname}</p>
+                    <TextField
+                        sx={{ ml: 1, flex: 1 }}
+                        size="small"
+                        placeholder='댓글 달기...'
+                        error={commentError}
+                        helperText={<span style={{ whiteSpace: 'nowrap' }}>{commentError && '댓글을 제대로 입력해주세요.'}</span>}
+                        defaultValue={commentContext}
+                        onChange={(e) => setCommentContext(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === 'Enter') { commentSubmit(e) }
+                        }}
+                    />
+                    <Button variant="contained" endIcon={<CreateIcon />} onClick={commentSubmit}>
+                        작성
+                    </Button>
+                </Box>
+            }
+            {
+                commentData.map((commentData, i) =>
+                    <CommentItem
+                        key={commentData.id}
+                        ref={commentItemRef}
+                        index={i}
+                        commentData={commentData}
+                        userId={userId}
+                        commentModify={commentModify}
+                        commentDelete={commentDelete} />
+                )
+            }
+        </>
+    )
+}
+
+const CommentItem = forwardRef(({ commentData, userId, commentModify, commentDelete }, ref) => {
+    const [commentContext, setCommentContext] = useState('');
+    const loginUserId = useSelector(state => state.userId);
+    const [commentModalVisible, setCommentModalVisible] = useState(false);
+
+    const handleModify = () => {
+        setCommentModalVisible(!commentModalVisible);
     }
-    //댓글 수정 API 
-    async callModifyCommentAPI(id) {
-        try {
-            const response = await axios.patch(Constant.serviceURL + `/comments/${id}`, { withCredentials: true });
-            console.log('response : ', response);
-            return response;
-        } catch (error) {
-            console.error('오류 발생:', error);
-        }
-    }
 
-    render() {
-        const commentList = this.props.commentList;
+    useImperativeHandle(ref, () => ({
+        commentModify: commentModify,
+        commentDelete: commentDelete
+    }));
 
-        return (
-            <>
-
-                <div>
-                    <p><ChatBubbleOutlineIcon fontSize="small" color="primary" /> : <span>{commentList.length}</span></p>
-                </div>
+    return (
+        <div key={commentData.id}>
+            <div className="component-row">
+                <h5 className={userId === commentData.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
                 {
-                    this.state.loginUserId !== 0 && <Box
+                    loginUserId === commentData.userId && <>
+                        <IconButton aria-label="modify" onClick={handleModify}>
+                            <EditIcon fontSize='small' />
+                        </IconButton>
+                        <IconButton aria-label="delete" onClick={() => commentDelete(commentData.id)}>
+                            <DeleteIcon fontSize='small' />
+                        </IconButton>
+                    </>
+                }
+            </div>
+            {
+                commentModalVisible === true ?
+                    <Box
                         component="form"
                         className="component-row"
                         sx={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
                             '& .MuiTextField-root': { mr: 1 },
+                            justifyContent: 'flex-start', // 기본값으로 설정할 justifyContent 추가
                         }}
                         noValidate
                         autoComplete="off"
                     >
-
-                        <p className={this.props.userId === this.state.loginUserId && "special-color"} style={{ marginRight: '8px' }}>{this.state.loginUserNickname}</p>
                         <TextField
-                            sx={{ ml: 1, flex: 1 }}
+                            id="outlined-required"
                             size="small"
-                            placeholder='댓글 달기...'
-                            error={this.state.commentError}
-                            helperText={<span style={{ whiteSpace: 'nowrap' }}>{this.state.commentError && '댓글을 제대로 입력해주세요.'}</span>}
-                            defaultValue={this.state.commentContext}
-                            onChange={(e) => this.setState({ commentContext: e.target.value })}
-                            onKeyPress={(e) => {
-                                if (e.key === 'Enter') { this.commentSubmit(e) }
-                            }}
+                            defaultValue={commentData.content}
+                            onChange={(e) => setCommentContext(e.target.value)}
                         />
-                        <Button variant="contained" endIcon={<CreateIcon />} onClick={this.commentSubmit}>
+                        <Button variant="contained" endIcon={<CreateIcon />} onClick={handleModify}>
                             작성
                         </Button>
                     </Box>
-                }
-
-                {
-                    commentList.map((commentData, i) =>
-                        <CommentItem
-                            key={commentData.id}
-                            index={i}
-                            id={commentData.id}
-                            commentDelete={this.commentDelete} // 수정된 부분
-                            commentModify={this.commentModify}
-                            commentData={commentData}
-                            loginUserId={this.state.loginUserId}
-                            userId={this.props.userId} />
-                    )
-                }
-            </>
-        )
-    }
-
-}
-
-class CommentItem extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            commentContext: '',
-            loginUserId: MyStorage.getState().userId,
-            commentModalVisible: false,
-        }
-    }
-    componentDidMount() {
-    }
-    //댓글 수정
-    commentModify = () => {
-        this.setState({ commentModalVisible: !this.state.commentModalVisible });
-    }
-    commentSubmit = (id) => {
-        this.props.commentModify(this.props.commentData.id); // 수정
-        console.log(id);
-    }
-    //댓글 삭제
-    commentDelete = (id) => {
-        this.props.commentDelete(this.props.commentData.id); // 삭제
-        console.log(id);
-    }
-
-    render() {
-        const commentData = this.props.commentData;
-        return (
-            <div key={this.props.commentData.id}>
-                <div className="component-row">
-                    <h5 className={commentData.userId === this.props.userId && "special-color"} style={{ marginRight: '8px' }}>{commentData.nickname}</h5>
-                    {
-                        this.state.loginUserId === commentData.userId && <>
-                            <IconButton aria-label="modify" onClick={this.commentModify}>
-                                <EditIcon fontSize='small' />
-                            </IconButton>
-                            <IconButton aria-label="delete" onClick={(e) => this.commentDelete(e.id)}>
-                                <DeleteIcon fontSize='small' />
-                            </IconButton>
-                        </>
-
-                    }
-                </div>
-                {
-                    this.state.commentModalVisible === true ?
-                        <Box
-                            component="form"
-                            className="component-row"
-                            sx={{
-                                '& .MuiTextField-root': { mr: 1 },
-                                justifyContent: 'flex-start', // 기본값으로 설정할 justifyContent 추가
-                            }}
-                            noValidate
-                            autoComplete="off"
-                        >
-                            <TextField
-                                id="outlined-required"
-                                size="small"
-                                defaultValue={commentData.content}
-                                onChange={(e) => this.setState({ commentContext: e.target.value })}
-                            />
-                            <Button variant="contained" endIcon={<CreateIcon />} onClick={(e) => this.commentSubmit(e.id)}>
-                                작성
-                            </Button>
-                        </Box>
-                        : <p style={{ marginTop: '0px', marginLeft: '8px' }}> {commentData.content}</p>
-                }
-
-            </div>
-
-        )
-    }
-}
+                    : <p style={{ marginTop: '0px', marginLeft: '8px' }}> {commentData.content}</p>
+            }
+        </div>
+    );
+});
+export default PostComment;
